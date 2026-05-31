@@ -4,10 +4,10 @@
 
 This project uses a **two-document system** for all product guidance:
 
-| Document | What's Inside | When to Read |
-|----------|---------------|--------------|
-| **PRODUCT_ANALYSIS.md** | Features, requirements, code standards, stakeholders, SWOT | Before coding, for technical details |
-| **PRODUCT_DIRECTION.md** | Mission, vision, strategy, priorities, roadmap, metrics | Before project starts, for strategic alignment |
+| Document                 | What's Inside                                              | When to Read                                   |
+| ------------------------ | ---------------------------------------------------------- | ---------------------------------------------- |
+| **PRODUCT_ANALYSIS.md**  | Features, requirements, code standards, stakeholders, SWOT | Before coding, for technical details           |
+| **PRODUCT_DIRECTION.md** | Mission, vision, strategy, priorities, roadmap, metrics    | Before project starts, for strategic alignment |
 
 ---
 
@@ -16,6 +16,7 @@ This project uses a **two-document system** for all product guidance:
 ### Step 1: Understand the Product (15 min)
 
 Read **PRODUCT_DIRECTION.md** sections 1-5:
+
 - What is BaoProject?
 - Why does it exist?
 - What are our core values?
@@ -24,6 +25,7 @@ Read **PRODUCT_DIRECTION.md** sections 1-5:
 ### Step 2: Understand What We're Building (10 min)
 
 Read **PRODUCT_ANALYSIS.md** sections 1-3:
+
 - Product features
 - User journeys
 - Functional requirements
@@ -31,6 +33,7 @@ Read **PRODUCT_ANALYSIS.md** sections 1-3:
 ### Step 3: Understand How to Code (15 min)
 
 Read **PRODUCT_ANALYSIS.md** section 7:
+
 - Code organization
 - File naming conventions
 - Component structure
@@ -81,29 +84,29 @@ Reference the documents as needed for questions.
 
 ### PRODUCT_DIRECTION.md Sections
 
-| Section | Purpose |
-|---------|---------|
-| 1-2 | Mission, vision, values |
-| 3-5 | Strategic objectives, priorities, principles |
-| 6 | Feature prioritization matrix |
-| 7 | Technical strategy (architecture, workflow, targets) |
-| 8 | Success metrics and KPIs |
-| 9 | Risk management |
-| 10 | Development standards reference |
-| 11 | Phase 1 roadmap (weeks 1-9) |
-| 12 | Go/no-go criteria for launch |
+| Section | Purpose                                              |
+| ------- | ---------------------------------------------------- |
+| 1-2     | Mission, vision, values                              |
+| 3-5     | Strategic objectives, priorities, principles         |
+| 6       | Feature prioritization matrix                        |
+| 7       | Technical strategy (architecture, workflow, targets) |
+| 8       | Success metrics and KPIs                             |
+| 9       | Risk management                                      |
+| 10      | Development standards reference                      |
+| 11      | Phase 1 roadmap (weeks 1-9)                          |
+| 12      | Go/no-go criteria for launch                         |
 
 ### PRODUCT_ANALYSIS.md Sections
 
-| Section | Purpose |
-|---------|---------|
-| 1 | Product overview and problem statement |
-| 2-4 | Features, user journeys, functional requirements |
-| 5 | Non-functional requirements (performance, security, etc.) |
-| 6 | Stakeholders |
-| 7 | Code standards, development practices |
-| 8-10 | Revenue model, SWOT, future improvements |
-| 11-12 | Success metrics, conclusion |
+| Section | Purpose                                                   |
+| ------- | --------------------------------------------------------- |
+| 1       | Product overview and problem statement                    |
+| 2-4     | Features, user journeys, functional requirements          |
+| 5       | Non-functional requirements (performance, security, etc.) |
+| 6       | Stakeholders                                              |
+| 7       | Code standards, development practices                     |
+| 8-10    | Revenue model, SWOT, future improvements                  |
+| 11-12   | Success metrics, conclusion                               |
 
 ---
 
@@ -160,13 +163,13 @@ Phase 5: AI & Recommendations (months 10-12)
 
 ## Phase 1 At a Glance (Weeks 1-9)
 
-| Week | Focus | Deliverable |
-|------|-------|------------|
-| 1-2 | Home & Article Pages | Working article browsing |
-| 3-4 | Search & Filtering | Content discovery |
-| 5-6 | Content & APIs | Scalable data layer |
-| 7-8 | Quality & Polish | Production-ready quality |
-| 9 | Deploy & Monitor | Live MVP |
+| Week | Focus                | Deliverable              |
+| ---- | -------------------- | ------------------------ |
+| 1-2  | Home & Article Pages | Working article browsing |
+| 3-4  | Search & Filtering   | Content discovery        |
+| 5-6  | Content & APIs       | Scalable data layer      |
+| 7-8  | Quality & Polish     | Production-ready quality |
+| 9    | Deploy & Monitor     | Live MVP                 |
 
 ---
 
@@ -224,21 +227,25 @@ Phase 5: AI & Recommendations (months 10-12)
 ## Getting Started Now
 
 1. **Clone and setup**:
+
    ```bash
    npm install
    ```
 
 2. **Start development server**:
+
    ```bash
    npm start
    ```
 
 3. **Run tests**:
+
    ```bash
    npm test
    ```
 
 4. **Create feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```

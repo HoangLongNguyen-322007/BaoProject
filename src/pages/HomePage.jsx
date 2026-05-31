@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import ArticleGrid from "../components/ArticleGrid";
-import CategoryBadge from "../components/CategoryBadge";
-import { CATEGORIES, MOCK_ARTICLES, getFeaturedArticles, getArticlesByCategory } from "../utils/mockData";
-import styles from "./HomePage.module.css";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import ArticleGrid from '../components/ArticleGrid';
+import CategoryBadge from '../components/CategoryBadge';
+import { CATEGORIES, MOCK_ARTICLES, getFeaturedArticles, getArticlesByCategory } from '../utils/mockData';
+import styles from './HomePage.module.css';
 
 function HomePage() {
    const [selectedCategory, setSelectedCategory] = useState(null);
@@ -40,9 +40,9 @@ function HomePage() {
             </h2>
             <div className={styles.categoryGrid} role="tablist">
                <button
-                  className={`${styles.categoryButton} ${!selectedCategory ? styles.active : ""}`}
+                  className={`${styles.categoryButton} ${!selectedCategory ? styles.active : ''}`}
                   onClick={() => setSelectedCategory(null)}
-                  style={!selectedCategory ? { backgroundColor: "black" } : {}}
+                  style={!selectedCategory ? { backgroundColor: 'black' } : {}}
                   role="tab"
                   aria-selected={!selectedCategory}
                >
@@ -51,7 +51,7 @@ function HomePage() {
                {CATEGORIES.map((category) => (
                   <button
                      key={category.id}
-                     className={`${styles.categoryButton} ${selectedCategory === category.id ? styles.active : ""}`}
+                     className={`${styles.categoryButton} ${selectedCategory === category.id ? styles.active : ''}`}
                      onClick={() => setSelectedCategory(category.id)}
                      style={selectedCategory === category.id ? { backgroundColor: category.color } : {}}
                      role="tab"
@@ -67,8 +67,8 @@ function HomePage() {
          <section className={styles.articles} aria-labelledby="articles-heading">
             <h2 id="articles-heading" className={styles.sectionTitle}>
                {selectedCategory
-                  ? CATEGORIES.find((c) => c.id === selectedCategory)?.name + " Articles"
-                  : "All Articles"}
+                  ? CATEGORIES.find((c) => c.id === selectedCategory)?.name + ' Articles'
+                  : 'All Articles'}
             </h2>
             <ArticleGrid articles={displayArticles} />
          </section>

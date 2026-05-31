@@ -5,12 +5,14 @@ A modern, responsive digital newspaper platform built with React 19. This is the
 ## 🚀 What's Been Built
 
 ### Pages
+
 - **Home Page** (`src/pages/HomePage.jsx`) - Featured articles section, category browsing, all articles grid
 - **Article Detail** (`src/pages/ArticleDetailPage.jsx`) - Full article view with metadata, related articles
 - **Search Results** (`src/pages/SearchPage.jsx`) - Search with filtering by category
 - **404 Page** - Not found page with link back to home
 
 ### Components
+
 - **Header** - Navigation bar with logo and search bar
 - **SearchBar** - Search form with category integration
 - **ArticleCard** - Reusable article listing card
@@ -18,6 +20,7 @@ A modern, responsive digital newspaper platform built with React 19. This is the
 - **CategoryBadge** - Clickable category tag with color coding
 
 ### Features
+
 ✅ Responsive design (mobile, tablet, desktop)
 ✅ Search articles with keyword and category filtering
 ✅ Browse articles by category
@@ -62,36 +65,45 @@ src/
 ## 🛠 Getting Started
 
 ### Installation
+
 ```bash
 npm install
 ```
 
 ### Development Server
+
 ```bash
 npm start
 ```
+
 Open [http://localhost:3000](http://localhost:3000) to view in the browser.
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
+
 Creates an optimized production build in the `build/` folder.
 
 ### Run Tests
+
 ```bash
 npm test
 ```
+
 Run component and utility tests (20+ tests included).
 
 ## 📊 Build Information
 
 **Bundle Size:**
+
 - Main JS: 60.94 kB (gzipped)
 - CSS: 643 B (gzipped)
 - Total: 63.7 KB gzipped ✅ (target: < 100KB)
 
 **Performance Optimizations:**
+
 - Code splitting enabled
 - Lazy loading for images
 - CSS Modules for scoped styling
@@ -113,12 +125,14 @@ Run component and utility tests (20+ tests included).
 ## 🧪 Testing
 
 **Test Coverage:**
+
 - ✅ Component tests for ArticleCard, ArticleGrid
 - ✅ Utility tests for formatDate, mockData, searchArticles
 - ✅ Integration tests for search and filtering
 - 20+ tests passing with 100% pass rate
 
 Run tests:
+
 ```bash
 npm test -- --watchAll=false
 ```
@@ -126,6 +140,7 @@ npm test -- --watchAll=false
 ## 📚 Mock Data
 
 The app uses mock data for development. Mock articles include 8 diverse articles across all categories:
+
 - Politics: Economic reform, international summit
 - Technology: AI platform
 - Sports: Championship victory
@@ -135,6 +150,7 @@ The app uses mock data for development. Mock articles include 8 diverse articles
 - Lifestyle: Travel trends
 
 **To integrate with real backend in Phase 2:**
+
 1. Replace `mockData.js` with API service calls
 2. Update components to use `useFetch` hook
 3. Add error handling and loading states (already implemented)
@@ -142,6 +158,7 @@ The app uses mock data for development. Mock articles include 8 diverse articles
 ## 🗺 Routing
 
 Routes configured with React Router:
+
 - `/` - Home page
 - `/article/:id` - Article detail page
 - `/search?q=query&category=id` - Search results
@@ -150,17 +167,20 @@ Routes configured with React Router:
 ## 🎨 Design System
 
 **Color Palette:**
+
 - Primary: #3b82f6 (blue)
 - Secondary: #8b5cf6 (purple)
 - Neutral: #f9fafb - #111827 (grays)
 - Category colors: Unique color per category
 
 **Typography:**
+
 - Heading sizes: 2rem (h1), 1.5rem (h2), 1.25rem (h3)
 - Body text: 1rem
 - UI text: 0.875rem - 0.95rem
 
 **Spacing:**
+
 - Base unit: 1rem
 - Common gaps: 0.5rem, 1rem, 1.5rem, 2rem
 

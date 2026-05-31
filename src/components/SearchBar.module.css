@@ -1,79 +1,79 @@
 .searchForm {
-  width: 100%;
+   width: 100%;
 }
 
 .inputWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  transition: all 0.2s ease;
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+   background: white;
+   border: 1px solid #e5e7eb;
+   border-radius: 0.5rem;
+   padding: 0.5rem;
+   transition: all 0.2s ease;
 }
 
 .inputWrapper:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+   border-color: #3b82f6;
+   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  font-family: inherit;
+   flex: 1;
+   border: none;
+   outline: none;
+   padding: 0.75rem 1rem;
+   font-size: 1rem;
+   font-family: inherit;
 }
 
 .input::placeholder {
-  color: #9ca3af;
+   color: #9ca3af;
 }
 
 .button {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  font-weight: 600;
+   background: #3b82f6;
+   color: white;
+   border: none;
+   border-radius: 0.375rem;
+   padding: 0.5rem 1rem;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: all 0.2s ease;
+   font-weight: 600;
 }
 
 .button:hover {
-  background: #2563eb;
+   background: #2563eb;
 }
 
 .button:active {
-  background: #1d4ed8;
+   background: #1d4ed8;
 }
 
 .button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+   outline: 2px solid #3b82f6;
+   outline-offset: 2px;
 }
 
 .icon {
-  width: 1.25rem;
-  height: 1.25rem;
+   width: 1.25rem;
+   height: 1.25rem;
 }
 
 @media (max-width: 640px) {
-  .inputWrapper {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+   .inputWrapper {
+      flex-direction: column;
+      gap: 0.5rem;
+   }
 
-  .input {
-    width: 100%;
-  }
+   .input {
+      width: 100%;
+   }
 
-  .button {
-    width: 100%;
-  }
+   .button {
+      width: 100%;
+   }
 }

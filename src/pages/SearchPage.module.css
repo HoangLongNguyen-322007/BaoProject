@@ -1,195 +1,195 @@
 .searchPage {
-  min-height: 100vh;
-  background: #f9fafb;
-  padding: 2rem 0;
+   min-height: 100vh;
+   background: #f9fafb;
+   padding: 2rem 0;
 }
 
 .container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 2rem;
+   max-width: 1280px;
+   margin: 0 auto;
+   padding: 0 2rem;
 }
 
 .header {
-  margin-bottom: 3rem;
+   margin-bottom: 3rem;
 }
 
 .header h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0 0 1rem 0;
-  color: #1f2937;
+   font-size: 2rem;
+   font-weight: 800;
+   margin: 0 0 1rem 0;
+   color: #1f2937;
 }
 
 .searchQuery {
-  font-size: 1.0625rem;
-  color: #6b7280;
-  margin: 0;
+   font-size: 1.0625rem;
+   color: #6b7280;
+   margin: 0;
 }
 
 .searchQuery strong {
-  color: #374151;
-  font-weight: 600;
+   color: #374151;
+   font-weight: 600;
 }
 
 .resultCount {
-  margin-left: 0.5rem;
-  color: #9ca3af;
-  font-size: 0.95rem;
+   margin-left: 0.5rem;
+   color: #9ca3af;
+   font-size: 0.95rem;
 }
 
 .filters {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+   background: white;
+   padding: 1.5rem;
+   border-radius: 0.5rem;
+   margin-bottom: 2rem;
+   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .filterTitle {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 1rem 0;
+   font-size: 1rem;
+   font-weight: 700;
+   color: #1f2937;
+   margin: 0 0 1rem 0;
 }
 
 .filterButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.75rem;
 }
 
 .filterButton {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 9999px;
-  background: white;
-  color: #6b7280;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: capitalize;
+   padding: 0.625rem 1.25rem;
+   border: 2px solid #e5e7eb;
+   border-radius: 9999px;
+   background: white;
+   color: #6b7280;
+   font-weight: 600;
+   font-size: 0.9375rem;
+   cursor: pointer;
+   transition: all 0.2s ease;
+   text-transform: capitalize;
 }
 
 .filterButton:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+   border-color: #3b82f6;
+   color: #3b82f6;
 }
 
 .filterButton.active {
-  color: white;
-  border-color: transparent;
+   color: white;
+   border-color: transparent;
 }
 
 .filterButton:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+   outline: 2px solid #3b82f6;
+   outline-offset: 2px;
 }
 
 .results {
-  background: white;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+   background: white;
+   padding: 2rem;
+   border-radius: 0.5rem;
+   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .noResults {
-  text-align: center;
-  padding: 3rem 2rem;
+   text-align: center;
+   padding: 3rem 2rem;
 }
 
 .noResults h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
+   font-size: 1.5rem;
+   font-weight: 700;
+   color: #1f2937;
+   margin: 0 0 0.5rem 0;
 }
 
 .noResults p {
-  font-size: 1rem;
-  color: #6b7280;
-  margin: 0 0 2rem 0;
+   font-size: 1rem;
+   color: #6b7280;
+   margin: 0 0 2rem 0;
 }
 
 .link {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: #3b82f6;
-  color: white;
-  text-decoration: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
+   display: inline-block;
+   padding: 0.75rem 1.5rem;
+   background: #3b82f6;
+   color: white;
+   text-decoration: none;
+   border-radius: 0.5rem;
+   font-weight: 600;
+   transition: all 0.2s ease;
 }
 
 .link:hover {
-  background: #2563eb;
+   background: #2563eb;
 }
 
 .link:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+   outline: 2px solid #3b82f6;
+   outline-offset: 2px;
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-  }
+   .container {
+      padding: 0 1rem;
+   }
 
-  .header h1 {
-    font-size: 1.5rem;
-  }
+   .header h1 {
+      font-size: 1.5rem;
+   }
 
-  .header {
-    margin-bottom: 2rem;
-  }
+   .header {
+      margin-bottom: 2rem;
+   }
 
-  .filters {
-    padding: 1rem;
-  }
+   .filters {
+      padding: 1rem;
+   }
 
-  .filterButtons {
-    gap: 0.5rem;
-  }
+   .filterButtons {
+      gap: 0.5rem;
+   }
 
-  .filterButton {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
+   .filterButton {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+   }
 
-  .results {
-    padding: 1.5rem;
-  }
+   .results {
+      padding: 1.5rem;
+   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 0.75rem;
-  }
+   .container {
+      padding: 0 0.75rem;
+   }
 
-  .header h1 {
-    font-size: 1.25rem;
-  }
+   .header h1 {
+      font-size: 1.25rem;
+   }
 
-  .searchQuery {
-    font-size: 0.95rem;
-  }
+   .searchQuery {
+      font-size: 0.95rem;
+   }
 
-  .filterButtons {
-    gap: 0.5rem;
-  }
+   .filterButtons {
+      gap: 0.5rem;
+   }
 
-  .filterButton {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.8125rem;
-  }
+   .filterButton {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8125rem;
+   }
 
-  .results {
-    padding: 1rem;
-  }
+   .results {
+      padding: 1rem;
+   }
 
-  .noResults {
-    padding: 2rem 1rem;
-  }
+   .noResults {
+      padding: 2rem 1rem;
+   }
 }
