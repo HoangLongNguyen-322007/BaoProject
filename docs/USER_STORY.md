@@ -1,4 +1,4 @@
-# Câu Chuyện Người Dùng (User Stories) - BaoProject
+# Câu Chuyện Người Dùng (User Stories) - Báo Rồng Vàng
 
 ## US-001: Xem Danh Sách Bài Viết Trên Trang Chủ
 
@@ -138,7 +138,7 @@ Medium (5 điểm)
 **Epic**: Tài Khoản Người Dùng & Cá Nhân Hóa
 
 **Là một** độc giả mới  
-**Tôi muốn** tạo tài khoản BaoProject  
+**Tôi muốn** tạo tài khoản Báo Rồng Vàng  
 **Để có thể** lưu bài viết và nhận thông báo
 
 ### Tiêu Chí Chấp Nhận

@@ -1,4 +1,4 @@
-# Epic - BaoProject
+# Epic - Báo Rồng Vàng
 
 ## Epic 1: Nền Tảng Đọc Tin Tức Cốt Lõi
 

@@ -1,4 +1,4 @@
-## BaoProject
+## BaoProject - Báo Rồng Vàng
 
 Website đọc báo nhưng bản temu
 Dự án cho btl ở uni

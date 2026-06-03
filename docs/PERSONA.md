@@ -1,4 +1,4 @@
-# Nhân Vật (Persona) - BaoProject
+# Nhân Vật (Persona) - Báo Rồng Vàng
 
 ## Persona 1: Độc Giả Bình Thường
 
@@ -31,7 +31,7 @@
 - Chia sẻ bài báo thú vị trên mạng xã hội
 - Xem khoảng 3-5 bài báo mỗi ngày
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Giao diện nhanh chóng và dễ sử dụng
 - Chức năng tìm kiếm mạnh mẽ
@@ -71,7 +71,7 @@
 - Trích dẫn nguồn từ các bài báo tin tức
 - Sử dụng chủ yếu từ thiết bị di động
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Tìm kiếm nâng cao với bộ lọc chi tiết
 - Truy cập miễn phí đầy đủ nội dung
@@ -111,7 +111,7 @@
 - Tuân theo các lĩnh vực cụ thể (kinh tế, công nghệ)
 - Muốn có phiên bản cao cấp không quảng cáo
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Danh mục tin tức được tùy chỉnh
 - Tin tức được lọc theo lĩnh vực quan tâm
@@ -151,7 +151,7 @@
 - Chỉ dành 5-10 phút cho tin tức
 - Ưa thích chia sẻ trên mạng xã hội
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Trang web tối ưu hóa cho di động
 - Tải trang nhanh chóng
@@ -191,7 +191,7 @@
 - Tìm kiếm phương tiện lớn để công bố
 - Muốn xây dựng danh tiếng như nhà báo
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Hệ thống quản lý nội dung dễ sử dụng
 - Bảng điều khiển phân tích chi tiết
@@ -231,7 +231,7 @@
 - Theo dõi tiêu chuẩn kỹ thuật
 - Kiểm tra độ chính xác và khách quan
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Bảng điều khiển quản lý nội dung mạnh mẽ
 - Quy trình phê duyệt rõ ràng
@@ -271,7 +271,7 @@
 - Ưa thích các bài báo chuyên sâu
 - Cần hỗ trợ nhanh chóng
 
-### Nhu Cầu Từ BaoProject
+### Nhu Cầu Từ Báo Rồng Vàng
 
 - Không quảng cáo trong phiên bản cao cấp
 - Nội dung độc quyền cho người đăng ký

@@ -1,8 +1,8 @@
-# Nhận Dạng Tính Năng - BaoProject
+# Nhận Dạng Tính Năng - Báo Rồng Vàng
 
 ## Tổng Quan
 
-Tài liệu này xác định tất cả các tính năng BaoProject được phân loại theo Phase, Epic, ưu tiên và trạng thái phát triển.
+Tài liệu này xác định tất cả các tính năng Báo Rồng Vàng được phân loại theo Phase, Epic, ưu tiên và trạng thái phát triển.
 
 ---
 
@@ -167,7 +167,7 @@ Tài liệu này xác định tất cả các tính năng BaoProject được ph
 
 **Thành Phần**:
 
-- Logo BaoProject
+- Logo Báo Rồng Vàng
 - Menu danh mục
 - Thanh tìm kiếm
 - Nút Đăng Nhập/Đăng Ký
