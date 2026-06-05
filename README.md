@@ -3,6 +3,10 @@
 Website đọc báo nhưng bản temu
 Dự án cho btl ở uni
 
+# Documentaion
+
+Tất cả ở trong docs/
+
 # Live running
 
 - dev
