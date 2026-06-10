@@ -69,7 +69,7 @@ Kiến trúc này cho phép tách biệt các mối quan tâm khác nhau, dễ b
 
 ```
 src/
-├── components/          # Các component React tái sử dụng
+├── components/         # Các component React tái sử dụng
 ├── pages/              # Các trang chính
 ├── services/           # API client services
 ├── hooks/              # Custom hooks
@@ -83,9 +83,9 @@ src/
 
 - **React**: UI library
 - **React Router**: Điều hướng (nếu cần)
-- **Axios/Fetch**: HTTP requests
-- **State Management**: useState, useContext hoặc Redux/Zustand (tuỳ chọn)
-- **CSS Framework**: Tailwind CSS, Material-UI, hoặc tự viết (tuỳ chọn)
+- **Axios/Fetch**: HTTPS requests
+- **State Management**: useState, useContext
+- **CSS Framework**: Tự viết
 
 ### 3.4 Quy Trình Giao Tiếp
 
@@ -111,8 +111,8 @@ src/
 
 ```
 backend/
-├── routes/             # Định nghĩa các endpoint API
-├── controllers/        # Xử lý logic cho mỗi route
+├── routes/            # Định nghĩa các endpoint API
+├── controllers/       # Xử lý logic cho mỗi route
 ├── models/            # Database models/schemas
 ├── middleware/        # Middleware (auth, logging, error handling)
 ├── validators/        # Validation schemas
