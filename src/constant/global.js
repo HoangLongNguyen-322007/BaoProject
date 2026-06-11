@@ -1,9 +1,24 @@
 export const CATEGORIES = [
-   { id: 'politics', name: 'Chính trị', color: '#3b82f6' },
-   { id: 'business', name: 'Kinh tế', color: '#10b981' },
-   { id: 'technology', name: 'Công nghệ', color: '#f59e0b' },
-   { id: 'sports', name: 'Thể thao', color: '#ef4444' },
-   { id: 'entertainment', name: 'Giải tri', color: '#8b5cf6' },
-   { id: 'health', name: 'Sức khỏe', color: '#06b6d4' },
-   { id: 'lifestyle', name: 'Đời sống', color: '#ec4899' },
+   { id: 'thoisu', name: 'Thời Sự', slug: 'thoisu', color: '#E53E3E' },
+   { id: 'thegioi', name: 'Thế Giới', slug: 'thegioi', color: '#3182CE' },
+   { id: 'business', name: 'Kinh Doanh', slug: 'business', color: '#D4AF37' },
+   { id: 'technology', name: 'Công Nghệ', slug: 'technology', color: '#4299E1' },
+   { id: 'sports', name: 'Thể Thao', slug: 'sports', color: '#38A169' },
+   { id: 'entertainment', name: 'Giải Trí', slug: 'entertainment', color: '#805AD5' },
+   { id: 'health', name: 'Sức Khỏe', slug: 'health', color: '#DD6B20' },
+   { id: 'education', name: 'Giáo Dục', slug: 'education', color: '#B7791F' },
+   { id: 'lifestyle', name: 'Đời Sống', slug: 'lifestyle', color: '#2C7A7B' },
 ];
+
+export const CATEGORY_MAP = {
+   thoisu: { name: 'Thời Sự', color: '#E53E3E' },
+   thegioi: { name: 'Thế Giới', color: '#3182CE' },
+   business: { name: 'Kinh Doanh', color: '#D4AF37' },
+   technology: { name: 'Công Nghệ', color: '#4299E1' },
+   sports: { name: 'Thể Thao', color: '#38A169' },
+   entertainment: { name: 'Giải Trí', color: '#805AD5' },
+   health: { name: 'Sức Khỏe', color: '#DD6B20' },
+   education: { name: 'Giáo Dục', color: '#B7791F' },
+   lifestyle: { name: 'Đời Sống', color: '#2C7A7B' },
+   politics: { name: 'Chính Trị', color: '#E53E3E' },
+};
