@@ -1,5 +1,43 @@
-* {
-   --text-primary: #000000;
-   --text-secondary: #767575;
-   --main-primary: #3b82f6;
+:root {
+   /* Brand Colors */
+   --gold-primary: #C9A227;
+   --gold-light: #D4AF37;
+   --gold-dark: #A07820;
+   --gold-glow: rgba(201, 162, 39, 0.25);
+
+   /* Dark Background */
+   --bg-primary: #0E0E0E;
+   --bg-secondary: #1A1A1A;
+   --bg-card: #1E1E1E;
+   --bg-hover: #252525;
+   --bg-border: #2A2A2A;
+
+   /* Text */
+   --text-white: #FFFFFF;
+   --text-primary: #E8E8E8;
+   --text-secondary: #A0A0A0;
+   --text-muted: #666666;
+   --text-gold: #C9A227;
+
+   /* Category Colors */
+   --cat-thoisu: #E53E3E;
+   --cat-congnghe: #3182CE;
+   --cat-thethao: #38A169;
+   --cat-giaotri: #805AD5;
+   --cat-suckhoe: #DD6B20;
+   --cat-kinhte: #2B6CB0;
+   --cat-giaoduc: #B7791F;
+   --cat-doisong: #2C7A7B;
+
+   /* Accent */
+   --accent-red: #E53E3E;
+   --accent-orange: #DD6B20;
+
+   /* Spacing */
+   --container-max: 1280px;
+   --header-height: 110px;
+
+   /* Shadows */
+   --shadow-gold: 0 0 20px rgba(201, 162, 39, 0.15);
+   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
