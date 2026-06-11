@@ -1,1 +1,57 @@
-console.log('Server running!');
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+require('dotenv').config();
+
+const { initDatabase } = require('../backend/config/database');
+const { seedDatabase } = require('../backend/config/seed');
+
+// Import routes
+const authRoutes = require('../backend/routes/auth');
+const articlesPublicRoutes = require('../backend/routes/articles-public');
+const articlesAuthorRoutes = require('../backend/routes/articles-author');
+const articlesEditorRoutes = require('../backend/routes/articles-editor');
+const adminRoutes = require('../backend/routes/admin');
+
+// Create Express app
+const app = express();
+
+// Middleware
+app.use(morgan('combined'));
+app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Initialize database
+initDatabase();
+
+// Seed database (only runs once due to INSERT OR IGNORE)
+seedDatabase();
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/articles', articlesPublicRoutes);
+app.use('/api/author/articles', articlesAuthorRoutes);
+app.use('/api/editor/articles', articlesEditorRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+});

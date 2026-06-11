@@ -7,6 +7,9 @@ import CategoryPage from '../pages/CategoryPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ProfileEditPage from '../pages/ProfileEditPage';
+import AuthorDashboard from '../pages/author/AuthorDashboard';
+import EditorDashboard from '../pages/editor/EditorDashboard';
+import AdminDashboard from '../pages/admin/AdminDashboard';
 import './App.css';
 
 // Auth routes that should NOT show the header
@@ -28,6 +31,9 @@ function AppLayout() {
                <Route path="/search" element={<SearchPage />} />
                <Route path="/category/:category" element={<CategoryPage />} />
                <Route path="/profile" element={<ProfileEditPage />} />
+               <Route path="/author" element={<AuthorDashboard />} />
+               <Route path="/editor" element={<EditorDashboard />} />
+               <Route path="/admin" element={<AdminDashboard />} />
                <Route
                   path="*"
                   element={

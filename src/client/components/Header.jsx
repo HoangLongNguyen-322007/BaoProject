@@ -92,18 +92,29 @@ function Header() {
                         </div>
                      </div>
                      {user ? (
-                        <Link to="/profile" className={styles.userInfo} id="header-profile-link">
-                           <div className={styles.avatarWrapper}>
-                              {user.avatar ? (
-                                 <img src={user.avatar} className={styles.userAvatar} alt="Avatar" />
-                              ) : (
-                                 <div className={styles.avatarPlaceholder}>
-                                    {user.name ? user.name.charAt(0) : 'U'}
-                                  </div>
-                              )}
-                           </div>
-                           <span className={styles.userName}>{user.name}</span>
-                        </Link>
+                        <div className={styles.userMenu}>
+                           <Link to="/profile" className={styles.userInfo} id="header-profile-link">
+                              <div className={styles.avatarWrapper}>
+                                 {user.avatar ? (
+                                    <img src={user.avatar} className={styles.userAvatar} alt="Avatar" />
+                                 ) : (
+                                    <div className={styles.avatarPlaceholder}>
+                                       {user.name ? user.name.charAt(0) : 'U'}
+                                     </div>
+                                 )}
+                              </div>
+                              <span className={styles.userName}>{user.name}</span>
+                           </Link>
+                           <Link to="/author" className={styles.authorLink} id="header-author-link" title="Quản lý bài viết">
+                              ✍️
+                           </Link>
+                           <Link to="/editor" className={styles.editorLink} id="header-editor-link" title="Duyệt bài viết">
+                              📋
+                           </Link>
+                           <Link to="/admin" className={styles.adminLink} id="header-admin-link" title="Quản lý hệ thống">
+                              ⚙️
+                           </Link>
+                        </div>
                      ) : (
                         <>
                            <Link to="/login" className={styles.btnLogin} id="btn-login">Đăng nhập</Link>

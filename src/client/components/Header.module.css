@@ -310,6 +310,72 @@
    background: rgba(255, 255, 255, 0.05);
 }
 
+.userMenu {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+}
+
+.authorLink {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 32px;
+   height: 32px;
+   border-radius: 4px;
+   background: rgba(228, 178, 74, 0.1);
+   border: 1px solid rgba(228, 178, 74, 0.3);
+   font-size: 1.1rem;
+   text-decoration: none;
+   transition: all 0.2s;
+   cursor: pointer;
+}
+
+.authorLink:hover {
+   background: rgba(228, 178, 74, 0.2);
+   border-color: var(--gold-primary);
+}
+
+.editorLink {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 32px;
+   height: 32px;
+   border-radius: 4px;
+   background: rgba(100, 150, 200, 0.1);
+   border: 1px solid rgba(100, 150, 200, 0.3);
+   font-size: 1.1rem;
+   text-decoration: none;
+   transition: all 0.2s;
+   cursor: pointer;
+}
+
+.editorLink:hover {
+   background: rgba(100, 150, 200, 0.2);
+   border-color: rgba(100, 150, 200, 0.8);
+}
+
+.adminLink {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 32px;
+   height: 32px;
+   border-radius: 4px;
+   background: rgba(244, 67, 54, 0.1);
+   border: 1px solid rgba(244, 67, 54, 0.3);
+   font-size: 1.1rem;
+   text-decoration: none;
+   transition: all 0.2s;
+   cursor: pointer;
+}
+
+.adminLink:hover {
+   background: rgba(244, 67, 54, 0.2);
+   border-color: rgba(244, 67, 54, 0.8);
+}
+
 .avatarWrapper {
    width: 32px;
    height: 32px;

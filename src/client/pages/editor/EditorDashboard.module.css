@@ -1,0 +1,619 @@
+:root {
+   --bg-dark: #0b0b0c;
+   --bg-panel: #0f1113;
+   --bg-hover: rgba(255, 255, 255, 0.04);
+   --text-primary: #e8e8e8;
+   --text-muted: #9aa0a6;
+   --gold: #e4b24a;
+   --gold-hover: #ffb84d;
+   --border: 1px solid rgba(255, 255, 255, 0.08);
+   --success: #4caf50;
+   --warning: #ff9800;
+   --error: #f44336;
+}
+
+* {
+   box-sizing: border-box;
+}
+
+.editorDashboard {
+   display: flex;
+   min-height: 100vh;
+   background: linear-gradient(180deg, #060606 0%, #0b0b0c 100%);
+   color: var(--text-primary);
+   font-family: inherit;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+   width: 260px;
+   background: var(--bg-panel);
+   border-right: var(--border);
+   padding: 1.5rem 0;
+   position: fixed;
+   height: 100vh;
+   overflow-y: auto;
+   left: 0;
+   top: 0;
+}
+
+.sidebarHeader {
+   padding: 1rem 1.2rem;
+   border-bottom: var(--border);
+   margin-bottom: 1rem;
+}
+
+.sidebarLogo {
+   display: block;
+   font-size: 1.1rem;
+   font-weight: 700;
+   color: var(--gold);
+   letter-spacing: 0.05em;
+}
+
+.sidebarSub {
+   display: block;
+   font-size: 0.75rem;
+   color: var(--text-muted);
+   margin-top: 0.2rem;
+}
+
+.sidebarNav {
+   display: flex;
+   flex-direction: column;
+   gap: 0.25rem;
+   padding: 0 0.5rem;
+}
+
+.navItem {
+   display: flex;
+   align-items: center;
+   gap: 0.8rem;
+   padding: 0.7rem 1rem;
+   border: none;
+   background: transparent;
+   color: var(--text-muted);
+   cursor: pointer;
+   border-radius: 6px;
+   transition: all 0.2s;
+   text-align: left;
+   font-size: 0.95rem;
+   position: relative;
+}
+
+.navItem:hover {
+   background: var(--bg-hover);
+   color: var(--text-primary);
+}
+
+.navItemActive {
+   background: rgba(228, 178, 74, 0.1);
+   color: var(--gold);
+   border-left: 3px solid var(--gold);
+   padding-left: calc(1rem - 3px);
+}
+
+.navIcon {
+   font-size: 1.1rem;
+   flex-shrink: 0;
+}
+
+.navLabel {
+   flex: 1;
+}
+
+.navBadge {
+   background: var(--error);
+   color: white;
+   font-size: 0.7rem;
+   font-weight: 700;
+   padding: 0.2rem 0.5rem;
+   border-radius: 10px;
+   min-width: 24px;
+   text-align: center;
+}
+
+/* ========== MAIN CONTENT ========== */
+.mainContent {
+   flex: 1;
+   margin-left: 260px;
+   padding: 2rem;
+   overflow-y: auto;
+}
+
+.mainContent h1 {
+   font-size: 1.8rem;
+   margin-bottom: 1.5rem;
+   font-weight: 700;
+}
+
+/* ========== DASHBOARD SECTION ========== */
+.dashboardSection {
+   width: 100%;
+}
+
+.statsGrid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+   gap: 1rem;
+   margin-bottom: 2rem;
+}
+
+.statBox {
+   display: flex;
+   gap: 1rem;
+   padding: 1.2rem;
+   background: var(--bg-panel);
+   border: var(--border);
+   border-radius: 10px;
+   transition: all 0.2s;
+}
+
+.statBox:hover {
+   background: rgba(228, 178, 74, 0.05);
+   border-color: rgba(228, 178, 74, 0.2);
+}
+
+.statIcon {
+   font-size: 2rem;
+   flex-shrink: 0;
+}
+
+.statText {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+}
+
+.statLabel {
+   font-size: 0.85rem;
+   color: var(--text-muted);
+}
+
+.statValue {
+   font-size: 1.6rem;
+   font-weight: 700;
+   color: var(--gold);
+}
+
+/* ========== REVIEW QUEUE ========== */
+.recentQueue,
+.reviewSection {
+   margin-top: 2.5rem;
+}
+
+.recentQueue h2,
+.reviewSection h1,
+.listSection h1 {
+   font-size: 1.4rem;
+   margin-bottom: 1.2rem;
+}
+
+.queueList {
+   display: flex;
+   flex-direction: column;
+   gap: 1.2rem;
+}
+
+/* ========== REVIEW CARD ========== */
+.reviewCard {
+   background: var(--bg-panel);
+   border: var(--border);
+   border-radius: 10px;
+   padding: 1.5rem;
+   transition: all 0.2s;
+}
+
+.reviewCard:hover {
+   border-color: var(--gold);
+   box-shadow: 0 4px 12px rgba(228, 178, 74, 0.1);
+}
+
+.reviewHeader {
+   display: flex;
+   justify-content: space-between;
+   align-items: flex-start;
+   margin-bottom: 1rem;
+   padding-bottom: 1rem;
+   border-bottom: var(--border);
+}
+
+.authorInfo {
+   display: flex;
+   gap: 0.8rem;
+   align-items: center;
+}
+
+.authorAvatar {
+   width: 40px;
+   height: 40px;
+   border-radius: 50%;
+   background: linear-gradient(135deg, var(--gold), rgba(228, 178, 74, 0.5));
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: 700;
+   color: #111;
+   flex-shrink: 0;
+}
+
+.authorName {
+   font-weight: 600;
+   font-size: 0.95rem;
+}
+
+.submitDate {
+   font-size: 0.8rem;
+   color: var(--text-muted);
+}
+
+.categoryBadge {
+   background: rgba(255, 152, 0, 0.1);
+   color: #ff9800;
+   padding: 0.3rem 0.8rem;
+   border-radius: 20px;
+   font-size: 0.8rem;
+   font-weight: 600;
+}
+
+.reviewTitle {
+   font-size: 1.2rem;
+   font-weight: 700;
+   margin: 0 0 0.8rem 0;
+   line-height: 1.4;
+}
+
+.reviewExcerpt {
+   color: var(--text-muted);
+   font-size: 0.9rem;
+   line-height: 1.5;
+   margin-bottom: 1rem;
+}
+
+.reviewMeta {
+   display: flex;
+   gap: 0.5rem;
+   font-size: 0.85rem;
+   color: var(--text-muted);
+   margin-bottom: 1rem;
+}
+
+.reviewContent {
+   margin-bottom: 1rem;
+   border-radius: 8px;
+   overflow: hidden;
+   max-height: 300px;
+}
+
+.reviewContent img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   max-height: 300px;
+}
+
+.reviewActions {
+   display: flex;
+   gap: 0.8rem;
+   justify-content: flex-end;
+}
+
+.btnReject,
+.btnEdit,
+.btnApprove {
+   padding: 0.6rem 1.2rem;
+   border: none;
+   border-radius: 6px;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.2s;
+   font-size: 0.9rem;
+}
+
+.btnReject {
+   background: rgba(244, 67, 54, 0.1);
+   color: #f44336;
+   border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.btnReject:hover {
+   background: rgba(244, 67, 54, 0.2);
+   border-color: #f44336;
+}
+
+.btnEdit {
+   background: rgba(255, 152, 0, 0.1);
+   color: #ff9800;
+   border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.btnEdit:hover {
+   background: rgba(255, 152, 0, 0.2);
+   border-color: #ff9800;
+}
+
+.btnApprove {
+   background: var(--gold);
+   color: #111;
+}
+
+.btnApprove:hover {
+   background: var(--gold-hover);
+}
+
+/* ========== ARTICLES TABLE ========== */
+.articlesTable {
+   background: var(--bg-panel);
+   border: var(--border);
+   border-radius: 10px;
+   overflow: hidden;
+}
+
+.tableHeader {
+   display: grid;
+   grid-template-columns: 2fr 1fr 1fr 1fr;
+   gap: 1rem;
+   padding: 1rem;
+   background: rgba(0, 0, 0, 0.2);
+   border-bottom: var(--border);
+   font-weight: 600;
+   font-size: 0.9rem;
+   color: var(--text-muted);
+}
+
+.tableRow {
+   display: grid;
+   grid-template-columns: 2fr 1fr 1fr 1fr;
+   gap: 1rem;
+   padding: 1rem;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+   align-items: center;
+   transition: background 0.2s;
+}
+
+.tableRow:hover {
+   background: var(--bg-hover);
+}
+
+.tableRow:last-child {
+   border-bottom: none;
+}
+
+.title {
+   font-weight: 600;
+   color: var(--text-primary);
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.statusApproved {
+   color: var(--success);
+   font-weight: 600;
+}
+
+.statusRejected {
+   color: var(--error);
+   font-weight: 600;
+}
+
+/* ========== GUIDELINES PANEL ========== */
+.guidelinesPanel {
+   max-width: 900px;
+}
+
+.panelTitle {
+   font-size: 1.4rem;
+   margin-bottom: 1.5rem;
+}
+
+.guideSection {
+   background: var(--bg-panel);
+   padding: 1.5rem;
+   border-radius: 10px;
+   border: var(--border);
+   margin-bottom: 1rem;
+}
+
+.guideSection h3 {
+   font-size: 1.1rem;
+   margin-top: 0;
+   margin-bottom: 0.8rem;
+   color: var(--gold);
+}
+
+.guideSection ul {
+   margin: 0;
+   padding-left: 1.5rem;
+   color: var(--text-muted);
+   line-height: 1.8;
+}
+
+.guideSection li {
+   margin-bottom: 0.5rem;
+}
+
+/* ========== PROFILE PANEL ========== */
+.profilePanel {
+   max-width: 600px;
+}
+
+.profileContent {
+   background: var(--bg-panel);
+   padding: 2rem;
+   border-radius: 10px;
+   border: var(--border);
+}
+
+.profileHeader {
+   display: flex;
+   gap: 1.5rem;
+   align-items: center;
+   margin-bottom: 2rem;
+   padding-bottom: 2rem;
+   border-bottom: var(--border);
+}
+
+.profileAvatar {
+   width: 100px;
+   height: 100px;
+   border-radius: 50%;
+   background: linear-gradient(180deg, rgba(228, 178, 74, 0.2), rgba(100, 100, 100, 0.2));
+   border: 2px solid rgba(228, 178, 74, 0.3);
+   flex-shrink: 0;
+}
+
+.profileHeader h3 {
+   font-size: 1.3rem;
+   margin: 0 0 0.3rem 0;
+}
+
+.profileHeader p {
+   margin: 0;
+   color: var(--text-muted);
+   font-size: 0.9rem;
+}
+
+.profileStats {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 1rem;
+   margin-bottom: 2rem;
+   padding-bottom: 2rem;
+   border-bottom: var(--border);
+}
+
+.statItem {
+   text-align: center;
+}
+
+.statItem .statLabel {
+   color: var(--text-muted);
+   font-size: 0.85rem;
+   display: block;
+   margin-bottom: 0.5rem;
+}
+
+.statItem .statNum {
+   display: block;
+   font-size: 1.8rem;
+   font-weight: 700;
+   color: var(--gold);
+}
+
+.profileDetails {
+   margin-bottom: 1.5rem;
+}
+
+.detailRow {
+   display: flex;
+   justify-content: space-between;
+   padding: 0.8rem 0;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+   font-size: 0.95rem;
+}
+
+.detailRow label {
+   color: var(--text-muted);
+   font-weight: 600;
+}
+
+.detailRow span {
+   color: var(--text-primary);
+}
+
+/* ========== BUTTONS ========== */
+.btnPrimaryFull {
+   width: 100%;
+   padding: 0.8rem;
+   background: var(--gold);
+   color: #111;
+   border: none;
+   border-radius: 6px;
+   font-weight: 600;
+   font-size: 0.95rem;
+   cursor: pointer;
+   margin-bottom: 0.8rem;
+   transition: all 0.2s;
+}
+
+.btnPrimaryFull:hover {
+   background: var(--gold-hover);
+}
+
+.btnOutlineFull {
+   width: 100%;
+   padding: 0.8rem;
+   background: transparent;
+   color: var(--text-primary);
+   border: 1px solid var(--text-muted);
+   border-radius: 6px;
+   font-weight: 600;
+   font-size: 0.95rem;
+   cursor: pointer;
+   transition: all 0.2s;
+}
+
+.btnOutlineFull:hover {
+   border-color: var(--text-primary);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+   .sidebar {
+      width: 220px;
+   }
+
+   .mainContent {
+      margin-left: 220px;
+      padding: 1.5rem;
+   }
+
+   .tableHeader,
+   .tableRow {
+      grid-template-columns: 2fr 1.5fr 1.5fr;
+   }
+
+   .statsGrid {
+      grid-template-columns: repeat(2, 1fr);
+   }
+}
+
+@media (max-width: 768px) {
+   .sidebar {
+      width: 200px;
+   }
+
+   .mainContent {
+      margin-left: 200px;
+      padding: 1rem;
+   }
+
+   .tableHeader,
+   .tableRow {
+      grid-template-columns: 1.5fr 1fr;
+   }
+
+   .tableHeader span:nth-child(n+3),
+   .tableRow span:nth-child(n+3) {
+      display: none;
+   }
+
+   .statsGrid {
+      grid-template-columns: 1fr;
+   }
+
+   .reviewActions {
+      flex-direction: column;
+   }
+
+   .btnReject,
+   .btnEdit,
+   .btnApprove {
+      width: 100%;
+   }
+
+   .profileStats {
+      grid-template-columns: 1fr;
+   }
+}
