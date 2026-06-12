@@ -36,19 +36,20 @@ describe('Article Service', () => {
 
    describe('searchArticles', () => {
       test('searches by query in title', () => {
-         const results = searchArticles('policy');
+         const results = searchArticles('Kinh tế');
          expect(results.length).toBeGreaterThan(0);
       });
 
       test('searches by query in excerpt or content', () => {
-         const results = searchArticles('platform');
+         const results = searchArticles('thủy sản');
          expect(results.length).toBeGreaterThan(0);
       });
 
       test('filters by category and query', () => {
-         const results = searchArticles('new', 'politics');
+         const results = searchArticles('Quốc hội', 'thoisu');
+         expect(results.length).toBeGreaterThan(0);
          results.forEach((article) => {
-            expect(article.category).toBe('politics');
+            expect(article.category).toBe('thoisu');
          });
       });
 
@@ -77,7 +78,7 @@ describe('Article Service', () => {
          const category = getCategoryById('technology');
          expect(category).toBeDefined();
          expect(category.id).toBe('technology');
-         expect(category.name).toBe('Technology');
+         expect(category.name).toBe('Công Nghệ');
       });
 
       test('returns undefined for invalid category', () => {
