@@ -99,21 +99,41 @@ function Header() {
                                     <img src={user.avatar} className={styles.userAvatar} alt="Avatar" />
                                  ) : (
                                     <div className={styles.avatarPlaceholder}>
-                                       {user.name ? user.name.charAt(0) : 'U'}
+                                       {user.fullName ? user.fullName.charAt(0) : 'U'}
                                      </div>
                                  )}
                               </div>
-                              <span className={styles.userName}>{user.name}</span>
+                              <span className={styles.userName}>{user.fullName}</span>
                            </Link>
-                           <Link to="/author" className={styles.authorLink} id="header-author-link" title="Quản lý bài viết">
-                              ✍️
-                           </Link>
-                           <Link to="/editor" className={styles.editorLink} id="header-editor-link" title="Duyệt bài viết">
-                              📋
-                           </Link>
-                           <Link to="/admin" className={styles.adminLink} id="header-admin-link" title="Quản lý hệ thống">
-                              ⚙️
-                           </Link>
+                           
+                           {user.role === 'author' && (
+                              <Link to="/author" className={styles.authorLink} id="header-author-link" title="Quản lý bài viết">
+                                 ✍️
+                              </Link>
+                           )}
+                           {user.role === 'editor' && (
+                              <Link to="/editor" className={styles.editorLink} id="header-editor-link" title="Duyệt bài viết">
+                                 📋
+                              </Link>
+                           )}
+                           {user.role === 'admin' && (
+                              <Link to="/admin" className={styles.adminLink} id="header-admin-link" title="Quản lý hệ thống">
+                                 ⚙️
+                              </Link>
+                           )}
+                           
+                           <button 
+                              onClick={() => {
+                                 localStorage.removeItem('auth_token');
+                                 localStorage.removeItem('user');
+                                 window.location.href = '/';
+                              }} 
+                              className={styles.btnLogout} 
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                              title="Đăng xuất"
+                           >
+                              🚪
+                           </button>
                         </div>
                      ) : (
                         <>

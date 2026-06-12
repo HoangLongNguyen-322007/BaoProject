@@ -25,11 +25,12 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize database
-initDatabase();
-
-// Seed database (only runs once due to INSERT OR IGNORE)
-seedDatabase();
+// Initialize and seed database
+initDatabase().then(() => {
+  seedDatabase();
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

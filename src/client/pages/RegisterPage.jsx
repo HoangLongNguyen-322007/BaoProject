@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authAPI } from '../../utils/api';
 import styles from './RegisterPage.module.css';
 
 function RegisterPage() {
@@ -12,7 +13,7 @@ function RegisterPage() {
    const [showConfirm, setShowConfirm] = useState(false);
    const [error, setError] = useState('');
 
-   const handleSubmit = (e) => {
+   const handleSubmit = async (e) => {
       e.preventDefault();
       setError('');
 
@@ -29,8 +30,13 @@ function RegisterPage() {
          return;
       }
 
-      // TODO: integrate with real auth API
-      setStep('success');
+      try {
+         // Pass username as both email and fullName for simplicity since UI only has username
+         await authAPI.register(username.trim(), password, username.trim(), 'guest');
+         setStep('success');
+      } catch (err) {
+         setError(err.message || 'Đăng ký thất bại. Tên đăng nhập có thể đã tồn tại.');
+      }
    };
 
    if (step === 'success') {

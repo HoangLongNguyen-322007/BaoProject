@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
 const userRepository = require('../Repositories/userRepository');
 const { authMiddleware } = require('../Middleware/auth');
 
@@ -21,10 +20,8 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = uuidv4();
 
     const newUser = await userRepository.create({
-      id: userId,
       email,
       password: hashedPassword,
       fullName,
@@ -32,7 +29,7 @@ router.post('/register', async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: userId, email, role: newUser.role },
+      { id: newUser.id, email, role: newUser.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
@@ -77,7 +74,7 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
+        fullName: user.fullName || user['fullName'],
         avatar: user.avatar,
         role: user.role
       },

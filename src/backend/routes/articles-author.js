@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
 const articleRepository = require('../Repositories/articleRepository');
 const userRepository = require('../Repositories/userRepository');
 const { authMiddleware, roleMiddleware } = require('../Middleware/auth');
@@ -16,9 +15,7 @@ router.post('/', authMiddleware, roleMiddleware(['author']), async (req, res) =>
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const articleId = uuidv4();
     const article = await articleRepository.create({
-      id: articleId,
       title,
       excerpt: excerpt || content.substring(0, 200),
       content,

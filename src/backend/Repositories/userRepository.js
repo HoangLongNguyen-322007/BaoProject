@@ -1,125 +1,81 @@
-const { db } = require('../config/database');
-const { promisify } = require('util');
-
-const dbRun = promisify(db.run.bind(db));
-const dbGet = promisify(db.get.bind(db));
-const dbAll = promisify(db.all.bind(db));
+const { pool } = require('../config/database');
 
 class UserRepository {
   async create(userData) {
-    const { id, email, password, fullName, role, avatar, bio } = userData;
-    
-    return new Promise((resolve, reject) => {
-      db.run(
-        `INSERT INTO users (id, email, password, fullName, role, avatar, bio) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [id, email, password, fullName, role || 'guest', avatar || null, bio || null],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id, email, fullName, role });
-        }
-      );
-    });
+    const { email, password, fullName, role, avatar, bio } = userData;
+    const result = await pool.query(
+      `INSERT INTO users (email, password, "fullName", role, avatar, bio)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, email, "fullName", role, avatar, bio, status, "createdAt"`,
+      [email, password, fullName, role || 'guest', avatar || null, bio || null]
+    );
+    return result.rows[0];
   }
 
   async findByEmail(email) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT * FROM users WHERE email = ?`,
-        [email],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT * FROM users WHERE email = $1`,
+      [email]
+    );
+    return result.rows[0] || null;
   }
 
   async findById(id) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT id, email, fullName, avatar, role, bio, phone, status, createdAt FROM users WHERE id = ?`,
-        [id],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT id, email, "fullName", avatar, role, bio, phone, status, "createdAt"
+       FROM users WHERE id = $1`,
+      [id]
+    );
+    return result.rows[0] || null;
   }
 
   async findByRole(role) {
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT id, email, fullName, avatar, role, bio, phone, status, createdAt FROM users WHERE role = ?`,
-        [role],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT id, email, "fullName", avatar, role, bio, phone, status, "createdAt"
+       FROM users WHERE role = $1 ORDER BY "createdAt" DESC`,
+      [role]
+    );
+    return result.rows;
   }
 
   async findAll(limit = 50, offset = 0) {
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT id, email, fullName, avatar, role, bio, phone, status, createdAt FROM users LIMIT ? OFFSET ?`,
-        [limit, offset],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT id, email, "fullName", avatar, role, bio, phone, status, "createdAt"
+       FROM users ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    return result.rows;
   }
 
   async update(id, updateData) {
     const { fullName, avatar, bio, phone, status } = updateData;
-    
-    return new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE users SET 
-         fullName = COALESCE(?, fullName),
-         avatar = COALESCE(?, avatar),
-         bio = COALESCE(?, bio),
-         phone = COALESCE(?, phone),
-         status = COALESCE(?, status),
-         updatedAt = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [fullName, avatar, bio, phone, status, id],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id, ...updateData });
-        }
-      );
-    });
-  }
-
-  async delete(id) {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `DELETE FROM users WHERE id = ?`,
-        [id],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ success: true });
-        }
-      );
-    });
+    const result = await pool.query(
+      `UPDATE users SET
+         "fullName" = COALESCE($1, "fullName"),
+         avatar = COALESCE($2, avatar),
+         bio = COALESCE($3, bio),
+         phone = COALESCE($4, phone),
+         status = COALESCE($5, status),
+         "updatedAt" = NOW()
+       WHERE id = $6
+       RETURNING id, email, "fullName", avatar, role, bio, phone, status`,
+      [fullName, avatar, bio, phone, status, id]
+    );
+    return result.rows[0];
   }
 
   async updateRole(id, role) {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE users SET role = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
-        [role, id],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id, role });
-        }
-      );
-    });
+    const result = await pool.query(
+      `UPDATE users SET role = $1, "updatedAt" = NOW()
+       WHERE id = $2 RETURNING id, role`,
+      [role, id]
+    );
+    return result.rows[0];
+  }
+
+  async delete(id) {
+    await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
+    return { success: true };
   }
 }
 

@@ -62,6 +62,9 @@ const authAPI = {
   getMe: () =>
     apiCall('GET', '/auth/me'),
 
+  getProfile: () =>
+    apiCall('GET', '/auth/me'),
+
   updateProfile: (data) =>
     apiCall('PUT', '/auth/me', data)
 };
@@ -214,8 +217,7 @@ const notificationsAPI = {
     apiCall('PUT', `/notifications/${id}/read`)
 };
 
-// Export all APIs
-module.exports = {
+export {
   tokenStorage,
   authAPI,
   articlesAPI,

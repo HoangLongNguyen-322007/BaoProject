@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
 const articleRepository = require('../Repositories/articleRepository');
 const categoryRepository = require('../Repositories/categoryRepository');
 const userRepository = require('../Repositories/userRepository');
 const { authMiddleware, roleMiddleware } = require('../Middleware/auth');
-const { db } = require('../config/database');
+const { pool } = require('../config/database');
 
 // ADMIN ROUTES
 
@@ -39,10 +38,10 @@ router.post('/articles/:id/publish', authMiddleware, roleMiddleware(['admin']), 
     await articleRepository.updateStatus(req.params.id, 'published');
     
     // Log action
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'ARTICLE_PUBLISHED', req.user.id, `Published article: ${article.title}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['ARTICLE_PUBLISHED', req.user.id, `Published article: ${article.title}`]
     );
 
     res.json({ message: 'Article published successfully' });
@@ -62,10 +61,10 @@ router.delete('/articles/:id', authMiddleware, roleMiddleware(['admin']), async 
 
     await articleRepository.delete(req.params.id);
     
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'ARTICLE_DELETED', req.user.id, `Deleted article: ${article.title}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['ARTICLE_DELETED', req.user.id, `Deleted article: ${article.title}`]
     );
 
     res.json({ message: 'Article deleted' });
@@ -85,9 +84,7 @@ router.post('/categories', authMiddleware, roleMiddleware(['admin']), async (req
       return res.status(400).json({ message: 'Name and slug required' });
     }
 
-    const categoryId = uuidv4();
     const category = await categoryRepository.create({
-      id: categoryId,
       name,
       slug,
       description,
@@ -95,10 +92,10 @@ router.post('/categories', authMiddleware, roleMiddleware(['admin']), async (req
       icon
     });
 
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'CATEGORY_CREATED', req.user.id, `Created category: ${name}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['CATEGORY_CREATED', req.user.id, `Created category: ${name}`]
     );
 
     res.status(201).json({ message: 'Category created', category });
@@ -182,10 +179,10 @@ router.put('/users/:id/role', authMiddleware, roleMiddleware(['admin']), async (
 
     const user = await userRepository.updateRole(req.params.id, role);
     
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'USER_ROLE_CHANGED', req.user.id, `Changed user ${req.params.id} role to ${role}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['USER_ROLE_CHANGED', req.user.id, `Changed user ${req.params.id} role to ${role}`]
     );
 
     res.json({ message: 'User role updated', user });
@@ -199,10 +196,10 @@ router.put('/users/:id/suspend', authMiddleware, roleMiddleware(['admin']), asyn
   try {
     const user = await userRepository.update(req.params.id, { status: 'suspended' });
     
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'USER_SUSPENDED', req.user.id, `Suspended user: ${req.params.id}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['USER_SUSPENDED', req.user.id, `Suspended user: ${req.params.id}`]
     );
 
     res.json({ message: 'User suspended', user });
@@ -216,10 +213,10 @@ router.put('/users/:id/activate', authMiddleware, roleMiddleware(['admin']), asy
   try {
     const user = await userRepository.update(req.params.id, { status: 'active' });
     
-    db.run(
-      `INSERT INTO system_logs (id, action, user_id, description)
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), 'USER_ACTIVATED', req.user.id, `Activated user: ${req.params.id}`]
+    await pool.query(
+      `INSERT INTO system_logs (action, user_id, description)
+       VALUES ($1, $2, $3)`,
+      ['USER_ACTIVATED', req.user.id, `Activated user: ${req.params.id}`]
     );
 
     res.json({ message: 'User activated', user });
@@ -233,15 +230,6 @@ router.put('/users/:id/activate', authMiddleware, roleMiddleware(['admin']), asy
 // Get dashboard statistics
 router.get('/stats', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
   try {
-    const dbGet = (query) => {
-      return new Promise((resolve, reject) => {
-        db.get(query, (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-    };
-
     const [
       totalArticlesRow,
       publishedArticlesRow,
@@ -250,21 +238,21 @@ router.get('/stats', authMiddleware, roleMiddleware(['admin']), async (req, res)
       totalAuthorsRow,
       totalEditorsRow
     ] = await Promise.all([
-      dbGet(`SELECT COUNT(*) as count FROM articles`),
-      dbGet(`SELECT COUNT(*) as count FROM articles WHERE status = 'published'`),
-      dbGet(`SELECT COUNT(*) as count FROM articles WHERE status = 'pending'`),
-      dbGet(`SELECT COUNT(*) as count FROM users`),
-      dbGet(`SELECT COUNT(*) as count FROM users WHERE role = 'author'`),
-      dbGet(`SELECT COUNT(*) as count FROM users WHERE role = 'editor'`)
+      pool.query(`SELECT COUNT(*) as count FROM articles`),
+      pool.query(`SELECT COUNT(*) as count FROM articles WHERE status = 'published'`),
+      pool.query(`SELECT COUNT(*) as count FROM articles WHERE status = 'pending'`),
+      pool.query(`SELECT COUNT(*) as count FROM users`),
+      pool.query(`SELECT COUNT(*) as count FROM users WHERE role = 'author'`),
+      pool.query(`SELECT COUNT(*) as count FROM users WHERE role = 'editor'`)
     ]);
 
     const stats = {
-      totalArticles: totalArticlesRow?.count || 0,
-      publishedArticles: publishedArticlesRow?.count || 0,
-      pendingArticles: pendingArticlesRow?.count || 0,
-      totalUsers: totalUsersRow?.count || 0,
-      totalAuthors: totalAuthorsRow?.count || 0,
-      totalEditors: totalEditorsRow?.count || 0
+      totalArticles: parseInt(totalArticlesRow.rows[0].count),
+      publishedArticles: parseInt(publishedArticlesRow.rows[0].count),
+      pendingArticles: parseInt(pendingArticlesRow.rows[0].count),
+      totalUsers: parseInt(totalUsersRow.rows[0].count),
+      totalAuthors: parseInt(totalAuthorsRow.rows[0].count),
+      totalEditors: parseInt(totalEditorsRow.rows[0].count)
     };
 
     res.json(stats);
@@ -279,18 +267,12 @@ router.get('/logs', authMiddleware, roleMiddleware(['admin']), async (req, res) 
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
 
-    const logs = new Promise((resolve, reject) => {
-      db.all(
-        `SELECT * FROM system_logs ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
-        [limit, offset],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
-        }
-      );
-    });
+    const logsResult = await pool.query(
+      `SELECT * FROM system_logs ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
 
-    res.json(await logs);
+    res.json(logsResult.rows);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch logs', error: error.message });
   }

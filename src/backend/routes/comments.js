@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
 const commentRepository = require('../Repositories/commentRepository');
 const articleRepository = require('../Repositories/articleRepository');
 const { authMiddleware, roleMiddleware, optionalAuth } = require('../Middleware/auth');
@@ -24,9 +23,7 @@ router.post('/:articleId', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Cannot comment on unpublished articles' });
     }
 
-    const commentId = uuidv4();
     const comment = await commentRepository.create({
-      id: commentId,
       article_id: articleId,
       user_id: req.user.id,
       content

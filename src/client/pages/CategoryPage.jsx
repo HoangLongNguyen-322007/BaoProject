@@ -1,27 +1,63 @@
+import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getArticlesByCategory, MOCK_ARTICLES, getFeaturedArticles } from '../../utils/mockData';
-import { CATEGORIES } from '../../constant/global';
+import { articlesAPI } from '../../utils/api';
+import { CATEGORIES, CATEGORY_MAP } from '../../constant/global';
 import ArticleGrid from '../components/ArticleGrid';
 import styles from './HomePage.module.css';
 
 function CategoryPage() {
    const { category } = useParams();
-   const normalizedCategory = category?.toLowerCase() ?? '';
+   const [articles, setArticles] = useState([]);
+   const [loading, setLoading] = useState(true);
 
-   const currentCategory = CATEGORIES.find((c) => {
-      const slug = (c.slug || c.name).toLowerCase();
-      return slug === normalizedCategory || c.id?.toString().toLowerCase() === normalizedCategory;
-   });
+   // Map slug from URL to category ID if needed, or use directly
+   // Assuming backend expects category ID or slug
+   // Actually, the route in backend is /api/articles?category=...
+   // We will pass the category parameter.
+   
+   useEffect(() => {
+      const fetchArticles = async () => {
+         setLoading(true);
+         try {
+            // Wait for 100ms just to show loading state nicely
+            // Then fetch from backend
+            let categoryFilter = category;
+            
+            // if we need to map slug to ID
+            const foundCategory = CATEGORIES.find(c => c.slug === category);
+            if (foundCategory) {
+               categoryFilter = foundCategory.id;
+            }
 
-   const filteredArticles = currentCategory
-      ? getArticlesByCategory(currentCategory.id)
-      : MOCK_ARTICLES.filter((article) => article.category?.toLowerCase() === normalizedCategory);
+            const data = await articlesAPI.getAll(50, 0, categoryFilter);
+            setArticles(data);
+         } catch (err) {
+            console.error('Failed to fetch category articles:', err);
+         } finally {
+            setLoading(false);
+         }
+      };
 
-   const featuredArticles = filteredArticles.filter((article) => article.featured);
+      fetchArticles();
+      window.scrollTo(0, 0);
+   }, [category]);
 
-   const title = currentCategory
-      ? `${currentCategory.name} Articles`
-      : `${normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1)} Articles`;
+   // find the display name
+   const displayCategory = CATEGORIES.find(c => c.slug === category) || CATEGORY_MAP[category] || { name: category };
+   const title = `${displayCategory.name}`;
+
+   const featuredArticles = articles.slice(0, 2); // just take first 2 as featured for now
+   const otherArticles = articles.slice(2);
+
+   if (loading) {
+      return (
+         <div className={styles.homePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            <div className="loading-spinner" style={{ fontSize: '1.5rem', color: 'var(--gold-primary)' }}>
+               Đang tải bài viết...
+            </div>
+         </div>
+      );
+   }
 
    return (
       <div className={styles.homePage}>
@@ -29,12 +65,12 @@ function CategoryPage() {
          {featuredArticles.length > 0 && (
             <section className={styles.featured} aria-labelledby="featured-heading">
                <h2 id="featured-heading" className={styles.sectionTitle}>
-                  Featured
+                  Tiêu điểm - {title}
                </h2>
                <div className={styles.featuredGrid}>
                   {featuredArticles.map((article) => (
                      <Link key={article.id} to={`/article/${article.id}`} className={styles.featuredCard}>
-                        <img src={article.image} alt={article.title} className={styles.featuredImage} />
+                        <img src={article.image || 'https://via.placeholder.com/800x400'} alt={article.title} className={styles.featuredImage} />
                         <div className={styles.featuredContent}>
                            <h3 className={styles.featuredTitle}>{article.title}</h3>
                            <p className={styles.featuredExcerpt}>{article.excerpt}</p>
@@ -48,9 +84,13 @@ function CategoryPage() {
          {/* Articles Section */}
          <section className={styles.articles} aria-labelledby="articles-heading">
             <h2 id="articles-heading" className={styles.sectionTitle}>
-               {title}
+               Mới nhất - {title}
             </h2>
-            <ArticleGrid articles={filteredArticles} />
+            {otherArticles.length > 0 ? (
+               <ArticleGrid articles={otherArticles} />
+            ) : (
+               <p style={{ textAlign: 'center', color: '#888', marginTop: '2rem' }}>Chưa có bài viết nào trong chuyên mục này.</p>
+            )}
          </section>
       </div>
    );

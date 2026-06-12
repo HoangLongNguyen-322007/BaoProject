@@ -1,72 +1,51 @@
-const { db } = require('../config/database');
+const { pool } = require('../config/database');
 
 class NotificationRepository {
   async create(notificationData) {
-    const { id, user_id, title, message, type } = notificationData;
-    
-    return new Promise((resolve, reject) => {
-      db.run(
-        `INSERT INTO notifications (id, user_id, title, message, type, isRead)
-         VALUES (?, ?, ?, ?, ?, 0)`,
-        [id, user_id, title, message, type || 'system'],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id, user_id, title, message, type: type || 'system', isRead: 0 });
-        }
-      );
-    });
+    const { user_id, title, message, type } = notificationData;
+    const result = await pool.query(
+      `INSERT INTO notifications (user_id, title, message, type, "isRead")
+       VALUES ($1, $2, $3, $4, FALSE)
+       RETURNING *`,
+      [user_id, title, message, type || 'system']
+    );
+    return result.rows[0];
   }
 
   async findByUser(userId) {
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT * FROM notifications WHERE user_id = ? ORDER BY createdAt DESC`,
-        [userId],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT * FROM notifications
+       WHERE user_id = $1
+       ORDER BY "createdAt" DESC`,
+      [userId]
+    );
+    return result.rows;
   }
 
   async findById(id) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT * FROM notifications WHERE id = ?`,
-        [id],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const result = await pool.query(
+      `SELECT * FROM notifications WHERE id = $1`,
+      [id]
+    );
+    return result.rows[0] || null;
   }
 
   async markAsRead(id, userId) {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE notifications SET isRead = 1 WHERE id = ? AND user_id = ?`,
-        [id, userId],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id, isRead: 1 });
-        }
-      );
-    });
+    const result = await pool.query(
+      `UPDATE notifications SET "isRead" = TRUE
+       WHERE id = $1 AND user_id = $2
+       RETURNING id, "isRead"`,
+      [id, userId]
+    );
+    return result.rows[0];
   }
 
   async markAllAsRead(userId) {
-    return new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE notifications SET isRead = 1 WHERE user_id = ?`,
-        [userId],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ success: true });
-        }
-      );
-    });
+    await pool.query(
+      `UPDATE notifications SET "isRead" = TRUE WHERE user_id = $1`,
+      [userId]
+    );
+    return { success: true };
   }
 }
 

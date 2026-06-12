@@ -1,97 +1,101 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getArticleById, getCategoryName, getCategoryById, MOCK_ARTICLES, getTimeAgo } from '../../utils/mockData';
-import { formatDate } from '../../utils/formatDate';
+import { articlesAPI, commentsAPI, tokenStorage } from '../../utils/api';
+import { CATEGORY_MAP } from '../../constant/global';
 import styles from './ArticleDetailPage.module.css';
+
+// Time helper function for fetched dates
+const getTimeAgo = (dateStr) => {
+   const date = new Date(dateStr);
+   const now = new Date();
+   const diffMs = now - date;
+   const diffMins = Math.floor(diffMs / 60000);
+   const diffHours = Math.floor(diffMins / 60);
+   if (diffMins < 60) return `${diffMins} phút trước`;
+   if (diffHours < 24) return `${diffHours} giờ trước`;
+   return `${Math.floor(diffHours / 24)} ngày trước`;
+};
 
 function ArticleDetailPage() {
    const { id } = useParams();
-   const article = getArticleById(id);
+   const [article, setArticle] = useState(null);
+   const [relatedArticles, setRelatedArticles] = useState([]);
+   const [mostReadArticles, setMostReadArticles] = useState([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(null);
    const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1.0);
    const [copied, setCopied] = useState(false);
 
    // Comments Section States
-   const loggedInUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-   const [comments, setComments] = useState([
-      {
-         id: 1,
-         author: 'Nguyễn Hoàng Nam',
-         avatar: '',
-         timeAgo: '2 giờ trước',
-         content: 'Bài viết rất hay và cung cấp nhiều thông tin hữu ích về tình hình kinh tế hiện nay. Cảm ơn tác giả!',
-         likes: 45,
-         liked: false,
-         replies: [
-            {
-               id: 11,
-               author: 'Lan Anh',
-               isAuthor: true,
-               avatar: '',
-               timeAgo: '1 giờ trước',
-               content: 'Cảm ơn anh/chị đã quan tâm và theo dõi bài viết!',
-               likes: 12,
-               liked: false
-            }
-         ],
-         showReplies: true
-      },
-      {
-         id: 2,
-         author: 'Trần Minh Quân',
-         avatar: '',
-         timeAgo: '3 giờ trước',
-         content: 'Tăng trưởng tích cực nhưng vẫn còn nhiều thách thức phía trước. Hy vọng các chính sách mới sẽ phát huy hiệu quả.',
-         likes: 28,
-         liked: false,
-         replies: []
-      },
-      {
-         id: 3,
-         author: 'Phạm Thu Hà',
-         avatar: '',
-         timeAgo: '5 giờ trước',
-         content: 'Số liệu 6,42% là rất ấn tượng trong bối cảnh kinh tế toàn cầu còn nhiều biến động.',
-         likes: 15,
-         liked: false,
-         replies: []
-      }
-   ]);
+   const loggedInUser = tokenStorage.getUser();
+   const [comments, setComments] = useState([]);
    const [newCommentText, setNewCommentText] = useState('');
    const [activeTab, setActiveTab] = useState('newest'); // 'newest' | 'popular'
 
-   const handleCommentSubmit = (e) => {
-      e.preventDefault();
-      if (!newCommentText.trim()) return;
+   useEffect(() => {
+      const fetchData = async () => {
+         setLoading(true);
+         setError(null);
+         try {
+            // Fetch main article
+            const articleData = await articlesAPI.getById(id);
+            setArticle(articleData);
+            
+            // Fetch related and most read (using getAll for simplicity in this demo)
+            const allArticles = await articlesAPI.getAll(20, 0);
+            
+            // Related: same category, different ID
+            const related = allArticles
+               .filter(a => a.category === articleData.category && a.id !== articleData.id)
+               .slice(0, 4);
+            setRelatedArticles(related);
+            
+            // Most read: just taking some from the list
+            setMostReadArticles(allArticles.slice(0, 5));
 
-      const newComment = {
-         id: Date.now(),
-         author: loggedInUser ? loggedInUser.name : 'Độc giả ẩn danh',
-         avatar: loggedInUser && loggedInUser.avatar ? loggedInUser.avatar : '',
-         timeAgo: 'Vừa xong',
-         content: newCommentText.trim(),
-         likes: 0,
-         liked: false,
-         replies: []
+            // Fetch comments
+            const commentsData = await commentsAPI.getByArticle(id);
+            setComments(commentsData);
+
+         } catch (err) {
+            console.error(err);
+            setError('Không thể tải bài viết. Bài viết có thể không tồn tại hoặc đã bị xóa.');
+         } finally {
+            setLoading(false);
+         }
       };
 
-      setComments([newComment, ...comments]);
-      setNewCommentText('');
+      fetchData();
+      window.scrollTo(0, 0);
+   }, [id]);
+
+   const handleCommentSubmit = async (e) => {
+      e.preventDefault();
+      if (!newCommentText.trim() || !loggedInUser) return;
+
+      try {
+         await commentsAPI.create(id, newCommentText.trim());
+         // Refresh comments
+         const commentsData = await commentsAPI.getByArticle(id);
+         setComments(commentsData);
+         setNewCommentText('');
+         alert('Bình luận đã được gửi và đang chờ duyệt.');
+      } catch (err) {
+         alert('Lỗi: ' + err.message);
+      }
    };
 
    const handleLikeComment = (commentId, replyId = null) => {
+      // Mock like feature for now
       setComments(prevComments =>
          prevComments.map(c => {
             if (replyId) {
                if (c.id === commentId) {
                   return {
                      ...c,
-                     replies: c.replies.map(r => {
+                     replies: c.replies?.map(r => {
                         if (r.id === replyId) {
-                           return {
-                              ...r,
-                              likes: r.liked ? r.likes - 1 : r.likes + 1,
-                              liked: !r.liked
-                           };
+                           return { ...r, likes: (r.likes || 0) + (r.liked ? -1 : 1), liked: !r.liked };
                         }
                         return r;
                      })
@@ -99,11 +103,7 @@ function ArticleDetailPage() {
                }
             } else {
                if (c.id === commentId) {
-                  return {
-                     ...c,
-                     likes: c.liked ? c.likes - 1 : c.likes + 1,
-                     liked: !c.liked
-                  };
+                  return { ...c, likes: (c.likes || 0) + (c.liked ? -1 : 1), liked: !c.liked };
                }
             }
             return c;
@@ -122,16 +122,21 @@ function ArticleDetailPage() {
       );
    };
 
-   // Scroll to top on article change
-   useEffect(() => {
-      window.scrollTo(0, 0);
-   }, [id]);
+   if (loading) {
+      return (
+         <div className={styles.articlePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            <div className="loading-spinner" style={{ fontSize: '1.5rem', color: 'var(--gold-primary)' }}>
+               Đang tải bài viết...
+            </div>
+         </div>
+      );
+   }
 
-   if (!article) {
+   if (error || !article) {
       return (
          <div className={styles.notFound}>
             <h1>Không tìm thấy bài viết</h1>
-            <p>Rất tiếc, chúng tôi không thể tìm thấy bài viết bạn đang yêu cầu.</p>
+            <p>{error || 'Rất tiếc, chúng tôi không thể tìm thấy bài viết bạn đang yêu cầu.'}</p>
             <Link to="/" className={styles.link}>
                Quay lại Trang chủ
             </Link>
@@ -139,18 +144,10 @@ function ArticleDetailPage() {
       );
    }
 
-   // Get related articles from same category (max 4)
-   const relatedArticles = MOCK_ARTICLES.filter(
-      (a) => a.category === article.category && a.id !== article.id
-   ).slice(0, 4);
-
-   // Get most read articles (top 5 from mock data)
-   const mostReadArticles = MOCK_ARTICLES.slice(0, 5);
-
    // Default tags if article doesn't have custom ones
    const tags = article.tags || ['Kinh tế Việt Nam', 'GDP', 'Tăng trưởng', 'Chính sách', 'Doanh nghiệp'];
 
-   const categoryInfo = getCategoryById(article.category) || { name: 'Tin tức', slug: 'news', color: '#D4AF37' };
+   const categoryInfo = CATEGORY_MAP[article.category] || { name: 'Tin tức', slug: 'news', color: '#D4AF37' };
 
    const handleCopyLink = () => {
       navigator.clipboard.writeText(window.location.href);
@@ -171,34 +168,11 @@ function ArticleDetailPage() {
    };
 
    const renderContent = () => {
-      if (article.contentBlocks && article.contentBlocks.length > 0) {
-         return article.contentBlocks.map((block, idx) => {
-            if (block.type === 'heading') {
-               return (
-                  <h3 key={idx} className={styles.subheading}>
-                     {block.text}
-                  </h3>
-               );
-            }
-            if (block.type === 'quote') {
-               return (
-                  <blockquote key={idx} className={styles.blockquote}>
-                     <p className={styles.quoteText}>“{block.text}”</p>
-                     {block.author && <span className={styles.quoteAuthor}>— {block.author}</span>}
-                  </blockquote>
-               );
-            }
-            return (
-               <p key={idx} className={styles.paragraph}>
-                  {block.text}
-               </p>
-            );
-         });
-      }
-
-      // Fallback parser for plain text
+      // Simple plain text renderer for our DB articles
+      if (!article.content) return null;
       return article.content.split('\n\n').map((paragraph, idx) => {
          const trimmed = paragraph.trim();
+         if (!trimmed) return null;
          if (trimmed.startsWith('### ')) {
             return (
                <h3 key={idx} className={styles.subheading}>
@@ -234,7 +208,7 @@ function ArticleDetailPage() {
             <nav className={styles.breadcrumb} aria-label="Breadcrumb">
                <Link to="/">Trang chủ</Link>
                <span className={styles.breadcrumbSeparator}>›</span>
-               <Link to={`/category/${categoryInfo.slug}`}>{categoryInfo.name}</Link>
+               <Link to={`/category/${article.category}`}>{categoryInfo.name}</Link>
                {article.subCategory && (
                   <>
                      <span className={styles.breadcrumbSeparator}>›</span>
@@ -249,7 +223,7 @@ function ArticleDetailPage() {
                   {/* Category Badge */}
                   <div className={styles.badgeWrapper}>
                      <Link
-                        to={`/category/${categoryInfo.slug}`}
+                        to={`/category/${article.category}`}
                         className={styles.categoryBadge}
                         style={{ '--category-color': categoryInfo.color }}
                      >
@@ -267,15 +241,15 @@ function ArticleDetailPage() {
                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                            <circle cx="12" cy="7" r="4" />
                         </svg>
-                        <span className={styles.authorName}>{article.author}</span>
+                        <span className={styles.authorName}>{article.author_name || article.author || 'Tác giả'}</span>
                      </div>
                      <div className={styles.dateMeta}>
                         <svg className={styles.metaIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                            <circle cx="12" cy="12" r="10" />
                            <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        <time dateTime={article.date.toISOString()}>
-                           {article.date.toLocaleDateString('vi-VN')} {article.date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                        <time dateTime={article.publishedAt || article.createdAt}>
+                           {new Date(article.publishedAt || article.createdAt).toLocaleDateString('vi-VN')} {new Date(article.publishedAt || article.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                         </time>
                      </div>
                      <div className={styles.readMeta}>
@@ -283,7 +257,7 @@ function ArticleDetailPage() {
                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                         </svg>
-                        <span>{article.readTime} phút đọc</span>
+                        <span>{article.readTime || 5} phút đọc</span>
                      </div>
                   </div>
 
@@ -348,7 +322,7 @@ function ArticleDetailPage() {
 
                   {/* Hero Image */}
                   <div className={styles.heroWrapper}>
-                     <img src={article.image} alt={article.title} className={styles.heroImage} />
+                     <img src={article.image || 'https://via.placeholder.com/800x600?text=No+Image'} alt={article.title} className={styles.heroImage} />
                      {article.caption && <div className={styles.heroCaption}>{article.caption}</div>}
                   </div>
 
@@ -366,7 +340,7 @@ function ArticleDetailPage() {
                         <svg className={styles.commentIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
-                        <h3 className={styles.commentsTitle}>BÌNH LUẬN ({comments.length + 125})</h3>
+                        <h3 className={styles.commentsTitle}>BÌNH LUẬN ({comments.length})</h3>
                      </div>
 
                      {/* Comment Input Box */}
@@ -374,7 +348,7 @@ function ArticleDetailPage() {
                         <div className={styles.commentAvatar}>
                            {loggedInUser ? (
                               <div className={styles.avatarEmpty}>
-                                 {loggedInUser.name ? loggedInUser.name.charAt(0) : 'U'}
+                                 {loggedInUser.fullName ? loggedInUser.fullName.charAt(0) : 'U'}
                               </div>
                            ) : (
                               <div className={styles.avatarEmpty}>?</div>
@@ -383,10 +357,11 @@ function ArticleDetailPage() {
                         <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
                            <textarea
                               className={styles.commentTextarea}
-                              placeholder="Viết bình luận của bạn..."
+                              placeholder={loggedInUser ? "Viết bình luận của bạn..." : "Vui lòng đăng nhập để bình luận"}
                               value={newCommentText}
                               onChange={(e) => setNewCommentText(e.target.value.slice(0, 1000))}
                               maxLength={1000}
+                              disabled={!loggedInUser}
                            />
                            <div className={styles.commentFormBottom}>
                               <div className={styles.commentFormTools}>
@@ -402,7 +377,7 @@ function ArticleDetailPage() {
                                  <button
                                     type="submit"
                                     className={styles.btnSubmitComment}
-                                    disabled={!newCommentText.trim()}
+                                    disabled={!newCommentText.trim() || !loggedInUser}
                                  >
                                     Gửi bình luận
                                  </button>
@@ -429,115 +404,67 @@ function ArticleDetailPage() {
 
                      {/* Comments List */}
                      <div className={styles.commentsList}>
-                        {comments.map((comment) => (
-                           <div key={comment.id} className={styles.commentItem}>
-                              <div className={styles.commentMain}>
-                                 <div className={styles.commentHeader}>
-                                    <div className={styles.commentUserAvatar}>
-                                       {comment.avatar ? (
-                                          <img src={comment.avatar} alt={comment.author} className={styles.avatarImg} />
-                                       ) : (
-                                          <div className={styles.avatarEmpty}>{comment.author.charAt(0)}</div>
-                                       )}
+                        {comments.length === 0 ? (
+                           <p style={{ color: '#888', marginTop: '1rem' }}>Chưa có bình luận nào.</p>
+                        ) : (
+                           comments.map((comment) => (
+                              <div key={comment.id} className={styles.commentItem}>
+                                 <div className={styles.commentMain}>
+                                    <div className={styles.commentHeader}>
+                                       <div className={styles.commentUserAvatar}>
+                                          {comment.avatar ? (
+                                             <img src={comment.avatar} alt={comment.user_name || 'User'} className={styles.avatarImg} />
+                                          ) : (
+                                             <div className={styles.avatarEmpty}>{(comment.user_name || 'U').charAt(0)}</div>
+                                          )}
+                                       </div>
+                                       <div className={styles.commentMeta}>
+                                          <span className={styles.commentAuthorName}>{comment.user_name || 'Người dùng'}</span>
+                                          <span className={styles.commentTime}>{getTimeAgo(comment.createdAt)}</span>
+                                       </div>
+                                       <button className={styles.commentOptionsBtn} aria-label="Tùy chọn bình luận">
+                                          •••
+                                       </button>
                                     </div>
-                                    <div className={styles.commentMeta}>
-                                       <span className={styles.commentAuthorName}>{comment.author}</span>
-                                       <span className={styles.commentTime}>{comment.timeAgo}</span>
+                                    <p className={styles.commentTextContent}>{comment.content}</p>
+                                    <div className={styles.commentActions}>
+                                       <button
+                                          className={`${styles.actionBtn} ${comment.liked ? styles.actionBtnLiked : ''}`}
+                                          onClick={() => handleLikeComment(comment.id)}
+                                       >
+                                          <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                                             <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                                          </svg>
+                                          <span>{comment.likes || 0}</span>
+                                       </button>
+                                       <button 
+                                          className={styles.actionTextBtn}
+                                          onClick={() => setNewCommentText(`@${comment.user_name || 'User'} `)}
+                                       >
+                                          Trả lời
+                                       </button>
+                                       <button className={`${styles.actionTextBtn} ${styles.btnReportComment}`}>
+                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '3px', verticalAlign: 'middle'}}>
+                                             <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                                             <line x1="4" y1="22" x2="4" y2="15" />
+                                          </svg>
+                                          Báo cáo
+                                       </button>
                                     </div>
-                                    <button className={styles.commentOptionsBtn} aria-label="Tùy chọn bình luận">
-                                       •••
-                                    </button>
-                                 </div>
-                                 <p className={styles.commentTextContent}>{comment.content}</p>
-                                 <div className={styles.commentActions}>
-                                    <button
-                                       className={`${styles.actionBtn} ${comment.liked ? styles.actionBtnLiked : ''}`}
-                                       onClick={() => handleLikeComment(comment.id)}
-                                    >
-                                       <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-                                          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                                       </svg>
-                                       <span>{comment.likes}</span>
-                                    </button>
-                                    <button 
-                                       className={styles.actionTextBtn}
-                                       onClick={() => setNewCommentText(`@${comment.author} `)}
-                                    >
-                                       Trả lời
-                                    </button>
-                                    <button className={`${styles.actionTextBtn} ${styles.btnReportComment}`}>
-                                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '3px', verticalAlign: 'middle'}}>
-                                          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                                          <line x1="4" y1="22" x2="4" y2="15" />
-                                       </svg>
-                                       Báo cáo
-                                    </button>
                                  </div>
                               </div>
-
-                              {/* Nested Replies */}
-                              {comment.replies && comment.replies.length > 0 && (
-                                 <div className={styles.repliesList}>
-                                    {comment.showReplies && comment.replies.map((reply) => (
-                                       <div key={reply.id} className={styles.replyItem}>
-                                          <div className={styles.commentHeader}>
-                                             <div className={styles.commentUserAvatar}>
-                                                {reply.avatar ? (
-                                                   <img src={reply.avatar} alt={reply.author} className={styles.avatarImg} />
-                                                ) : (
-                                                   <div className={styles.avatarEmpty}>{reply.author.charAt(0)}</div>
-                                                )}
-                                             </div>
-                                             <div className={styles.commentMeta}>
-                                                <div className={styles.replyAuthorWrapper}>
-                                                   <span className={styles.commentAuthorName}>{reply.author}</span>
-                                                   {reply.isAuthor && <span className={styles.authorBadge}>Tác giả</span>}
-                                                </div>
-                                                <span className={styles.commentTime}>{reply.timeAgo}</span>
-                                             </div>
-                                          </div>
-                                          <p className={styles.commentTextContent}>{reply.content}</p>
-                                          <div className={styles.commentActions}>
-                                             <button
-                                                className={`${styles.actionBtn} ${reply.liked ? styles.actionBtnLiked : ''}`}
-                                                onClick={() => handleLikeComment(comment.id, reply.id)}
-                                             >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill={reply.liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-                                                   <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                                                </svg>
-                                                <span>{reply.likes}</span>
-                                             </button>
-                                             <button 
-                                                className={styles.actionTextBtn}
-                                                onClick={() => setNewCommentText(`@${reply.author} `)}
-                                             >
-                                                Trả lời
-                                             </button>
-                                          </div>
-                                       </div>
-                                    ))}
-                                    <button 
-                                       className={styles.toggleRepliesBtn}
-                                       onClick={() => toggleReplies(comment.id)}
-                                    >
-                                       {comment.showReplies ? 'Ẩn câu trả lời' : `Xem thêm ${comment.replies.length} câu trả lời`}
-                                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginLeft: '4px', transform: comment.showReplies ? 'rotate(180deg)' : 'rotate(0)'}}>
-                                          <polyline points="6 9 12 15 18 9" />
-                                       </svg>
-                                    </button>
-                                 </div>
-                              )}
-                           </div>
-                        ))}
+                           ))
+                        )}
                      </div>
 
-                     {/* Load More Button */}
-                     <button className={styles.btnLoadMoreComments}>
-                        Xem thêm bình luận
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginLeft: '6px'}}>
-                           <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                     </button>
+                     {comments.length > 0 && (
+                        <button className={styles.btnLoadMoreComments}>
+                           Xem thêm bình luận
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginLeft: '6px'}}>
+                              <polyline points="6 9 12 15 18 9" />
+                           </svg>
+                        </button>
+                     )}
                   </section>
                </article>
 
@@ -556,7 +483,7 @@ function ArticleDetailPage() {
                            {relatedArticles.map((relArticle) => (
                               <Link key={relArticle.id} to={`/article/${relArticle.id}`} className={styles.relatedItem}>
                                  <div className={styles.relatedImgWrapper}>
-                                    <img src={relArticle.image} alt={relArticle.title} className={styles.relatedImg} />
+                                    <img src={relArticle.image || 'https://via.placeholder.com/150x150?text=No+Image'} alt={relArticle.title} className={styles.relatedImg} />
                                  </div>
                                  <div className={styles.relatedText}>
                                     <h4 className={styles.relatedTitleText}>{relArticle.title}</h4>
@@ -565,7 +492,7 @@ function ArticleDetailPage() {
                                           <circle cx="12" cy="12" r="10" />
                                           <polyline points="12 6 12 12 16 14" />
                                        </svg>
-                                       {getTimeAgo(relArticle.date)}
+                                       {getTimeAgo(relArticle.publishedAt || relArticle.createdAt)}
                                     </span>
                                  </div>
                               </Link>
@@ -592,24 +519,26 @@ function ArticleDetailPage() {
                   </div>
 
                   {/* Đọc nhiều */}
-                  <div className={styles.sidebarBlock}>
-                     <div className={styles.sidebarHead}>
-                        <svg className={styles.goldIcon} width="16" height="16" viewBox="0 0 24 24" fill="var(--gold-primary)">
-                           <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2" />
-                        </svg>
-                        <h3 className={styles.sidebarTitle}>ĐỌC NHIỀU</h3>
+                  {mostReadArticles.length > 0 && (
+                     <div className={styles.sidebarBlock}>
+                        <div className={styles.sidebarHead}>
+                           <svg className={styles.goldIcon} width="16" height="16" viewBox="0 0 24 24" fill="var(--gold-primary)">
+                              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2" />
+                           </svg>
+                           <h3 className={styles.sidebarTitle}>ĐỌC NHIỀU</h3>
+                        </div>
+                        <div className={styles.mostReadList}>
+                           {mostReadArticles.map((mrArticle, index) => (
+                              <Link key={mrArticle.id} to={`/article/${mrArticle.id}`} className={styles.mostReadItem}>
+                                 <span className={styles.rankNumber}>{index + 1}</span>
+                                 <div className={styles.mostReadText}>
+                                    <h4 className={styles.mostReadTitleText}>{mrArticle.title}</h4>
+                                 </div>
+                              </Link>
+                           ))}
+                        </div>
                      </div>
-                     <div className={styles.mostReadList}>
-                        {mostReadArticles.map((mrArticle, index) => (
-                           <Link key={mrArticle.id} to={`/article/${mrArticle.id}`} className={styles.mostReadItem}>
-                              <span className={styles.rankNumber}>{index + 1}</span>
-                              <div className={styles.mostReadText}>
-                                 <h4 className={styles.mostReadTitleText}>{mrArticle.title}</h4>
-                              </div>
-                           </Link>
-                        ))}
-                     </div>
-                  </div>
+                  )}
                </aside>
             </div>
          </div>

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
 const bookmarkRepository = require('../Repositories/bookmarkRepository');
 const articleRepository = require('../Repositories/articleRepository');
 const { authMiddleware } = require('../Middleware/auth');
@@ -26,8 +25,7 @@ router.post('/:articleId', authMiddleware, async (req, res) => {
       return res.status(409).json({ message: 'Article already bookmarked' });
     }
 
-    const bookmarkId = uuidv4();
-    const bookmark = await bookmarkRepository.create(bookmarkId, userId, articleId);
+    const bookmark = await bookmarkRepository.create(userId, articleId);
 
     res.status(201).json({
       message: 'Article bookmarked successfully',
