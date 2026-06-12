@@ -1,5 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MOCK_ARTICLES, getTimeAgo } from '../../utils/mockData';
+import { articlesAPI } from '../../utils/api';
 import { CATEGORY_MAP } from '../../constant/global';
 import styles from './HomePage.module.css';
 
@@ -16,6 +17,18 @@ function CatBadge({ categoryId, small = false }) {
    );
 }
 
+// Time helper function for fetched dates
+const getTimeAgo = (dateStr) => {
+   const date = new Date(dateStr);
+   const now = new Date();
+   const diffMs = now - date;
+   const diffMins = Math.floor(diffMs / 60000);
+   const diffHours = Math.floor(diffMins / 60);
+   if (diffMins < 60) return `${diffMins} phút trước`;
+   if (diffHours < 24) return `${diffHours} giờ trước`;
+   return `${Math.floor(diffHours / 24)} ngày trước`;
+};
+
 // Time display
 function TimeAgo({ date }) {
    return (
@@ -30,13 +43,62 @@ function TimeAgo({ date }) {
 }
 
 function HomePage() {
-   // Data slices
-   const heroArticle = MOCK_ARTICLES[0];
-   const midArticles = MOCK_ARTICLES.slice(1, 5);
-   const latestNews = MOCK_ARTICLES.slice(0, 5);
-   const thoisuArticles = MOCK_ARTICLES.filter((a) => a.category === 'thoisu').slice(0, 4);
-   const techFeatured = MOCK_ARTICLES.find((a) => a.techFeatured);
-   const techSmall = MOCK_ARTICLES.filter((a) => a.category === 'technology' && !a.techFeatured).slice(0, 2);
+   const [articles, setArticles] = useState([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(null);
+
+   useEffect(() => {
+      const fetchArticles = async () => {
+         try {
+            const data = await articlesAPI.getAll(20, 0);
+            setArticles(data);
+            setLoading(false);
+         } catch (err) {
+            console.error('Error fetching articles:', err);
+            setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+            setLoading(false);
+         }
+      };
+
+      fetchArticles();
+   }, []);
+
+   if (loading) {
+      return (
+         <div className={styles.homePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            <div className="loading-spinner" style={{ fontSize: '1.5rem', color: 'var(--gold-primary)' }}>
+               Đang tải bài viết...
+            </div>
+         </div>
+      );
+   }
+
+   if (error) {
+      return (
+         <div className={styles.homePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: 'red' }}>
+            {error}
+         </div>
+      );
+   }
+
+   if (!articles || articles.length === 0) {
+      return (
+         <div className={styles.homePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            Chưa có bài viết nào được xuất bản.
+         </div>
+      );
+   }
+
+   // Data slices from real API data
+   const heroArticle = articles[0];
+   const midArticles = articles.slice(1, 5);
+   const latestNews = articles.slice(0, 5);
+   const thoisuArticles = articles.filter((a) => a.category === 'thoisu').slice(0, 4);
+   
+   // We don't have techFeatured in DB, so we just pick the first technology article as featured if available
+   const techArticles = articles.filter((a) => a.category === 'technology');
+   const techFeatured = techArticles.length > 0 ? techArticles[0] : null;
+   const techSmall = techFeatured ? techArticles.slice(1, 3) : techArticles.slice(0, 2);
 
    return (
       <div className={styles.homePage}>
@@ -48,7 +110,7 @@ function HomePage() {
                   <div className={styles.heroLeft}>
                      <Link to={`/article/${heroArticle.id}`} className={styles.heroCard} id="hero-main-article">
                         <img
-                           src={heroArticle.image}
+                           src={heroArticle.image || 'https://via.placeholder.com/800x600?text=No+Image'}
                            alt={heroArticle.title}
                            className={styles.heroImage}
                         />
@@ -57,7 +119,7 @@ function HomePage() {
                            <h2 className={styles.heroTitle}>{heroArticle.title}</h2>
                            <p className={styles.heroExcerpt}>{heroArticle.excerpt}</p>
                            <div className={styles.heroMeta}>
-                              <TimeAgo date={heroArticle.date} />
+                              <TimeAgo date={heroArticle.publishedAt || heroArticle.createdAt} />
                               <CatBadge categoryId={heroArticle.category} />
                            </div>
                         </div>
@@ -74,7 +136,7 @@ function HomePage() {
                            id={`mid-article-${article.id}`}
                         >
                            <img
-                              src={article.image}
+                              src={article.image || 'https://via.placeholder.com/400x300?text=No+Image'}
                               alt={article.title}
                               className={styles.midImage}
                               loading="lazy"
@@ -82,7 +144,7 @@ function HomePage() {
                            <div className={styles.midContent}>
                               <h3 className={styles.midTitle}>{article.title}</h3>
                               <div className={styles.midMeta}>
-                                 <TimeAgo date={article.date} />
+                                 <TimeAgo date={article.publishedAt || article.createdAt} />
                                  <CatBadge categoryId={article.category} small />
                               </div>
                            </div>
@@ -107,7 +169,7 @@ function HomePage() {
                               id={`latest-${idx + 1}`}
                            >
                               <h4 className={styles.latestTitle}>{article.title}</h4>
-                              <TimeAgo date={article.date} />
+                              <TimeAgo date={article.publishedAt || article.createdAt} />
                            </Link>
                         ))}
                      </div>
@@ -146,7 +208,7 @@ function HomePage() {
                               id={`thoisu-${article.id}`}
                            >
                               <img
-                                 src={article.image}
+                                 src={article.image || 'https://via.placeholder.com/400x300?text=No+Image'}
                                  alt={article.title}
                                  className={styles.thoisuImg}
                                  loading="lazy"
@@ -155,12 +217,15 @@ function HomePage() {
                                  <h3 className={styles.thoisuTitle}>{article.title}</h3>
                                  <p className={styles.thoisuExcerpt}>{article.excerpt}</p>
                                  <div className={styles.thoisuMeta}>
-                                    <TimeAgo date={article.date} />
+                                    <TimeAgo date={article.publishedAt || article.createdAt} />
                                     <CatBadge categoryId={article.category} small />
                                  </div>
                               </div>
                            </Link>
                         ))}
+                        {thoisuArticles.length === 0 && (
+                           <p style={{ color: '#888' }}>Chưa có bài viết Thời sự nào.</p>
+                        )}
                      </div>
                   </div>
 
@@ -176,23 +241,25 @@ function HomePage() {
                         </Link>
                      </div>
                      {/* Big Tech Card */}
-                     {techFeatured && (
+                     {techFeatured ? (
                         <Link
                            to={`/article/${techFeatured.id}`}
                            className={styles.techBig}
                            id="tech-featured"
                         >
                            <img
-                              src={techFeatured.image}
+                              src={techFeatured.image || 'https://via.placeholder.com/600x400?text=No+Image'}
                               alt={techFeatured.title}
                               className={styles.techBigImg}
                               loading="lazy"
                            />
                            <div className={styles.techBigOverlay}>
                               <h3 className={styles.techBigTitle}>{techFeatured.title}</h3>
-                              <TimeAgo date={techFeatured.date} />
+                              <TimeAgo date={techFeatured.publishedAt || techFeatured.createdAt} />
                            </div>
                         </Link>
+                     ) : (
+                        <p style={{ color: '#888', marginBottom: '1rem' }}>Chưa có bài viết Công nghệ nào.</p>
                      )}
                      {/* Small Tech Cards */}
                      <div className={styles.techSmallList}>
@@ -204,14 +271,14 @@ function HomePage() {
                               id={`tech-${article.id}`}
                            >
                               <img
-                                 src={article.image}
+                                 src={article.image || 'https://via.placeholder.com/150x150?text=No+Image'}
                                  alt={article.title}
                                  className={styles.techSmallImg}
                                  loading="lazy"
                               />
                               <div className={styles.techSmallContent}>
                                  <h4 className={styles.techSmallTitle}>{article.title}</h4>
-                                 <TimeAgo date={article.date} />
+                                 <TimeAgo date={article.publishedAt || article.createdAt} />
                               </div>
                            </Link>
                         ))}
@@ -247,3 +314,4 @@ function HomePage() {
 }
 
 export default HomePage;
+

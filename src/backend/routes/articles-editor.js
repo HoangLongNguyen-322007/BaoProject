@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
 const articleRepository = require('../Repositories/articleRepository');
 const userRepository = require('../Repositories/userRepository');
 const { authMiddleware, roleMiddleware } = require('../Middleware/auth');
-const { db } = require('../config/database');
+const { pool } = require('../config/database');
+const notificationRepository = require('../Repositories/notificationRepository');
 
 // EDITOR ROUTES
 
@@ -60,10 +60,18 @@ router.post('/:id/approve', authMiddleware, roleMiddleware(['editor']), async (r
     await articleRepository.updateStatus(req.params.id, 'approved');
     await articleRepository.assignEditor(req.params.id, req.user.id);
 
+    // Create notification for author
+    await notificationRepository.create({
+      user_id: article.author_id,
+      title: 'Bài viết được phê duyệt',
+      message: `Bài viết "${article.title}" của bạn đã được phê duyệt bởi biên tập viên.`,
+      type: 'approval'
+    });
+
     // Update editor stats
-    db.run(
-      `UPDATE editor_stats SET articlesApproved = articlesApproved + 1, articlesReviewed = articlesReviewed + 1 
-       WHERE editor_id = ?`,
+    await pool.query(
+      `UPDATE editor_stats SET "articlesApproved" = "articlesApproved" + 1, "articlesReviewed" = "articlesReviewed" + 1 
+       WHERE editor_id = $1`,
       [req.user.id]
     );
 
@@ -89,10 +97,18 @@ router.post('/:id/reject', authMiddleware, roleMiddleware(['editor']), async (re
 
     await articleRepository.updateStatus(req.params.id, 'rejected', reason);
 
+    // Create notification for author
+    await notificationRepository.create({
+      user_id: article.author_id,
+      title: 'Bài viết bị từ chối',
+      message: `Bài viết "${article.title}" của bạn đã bị từ chối. Lý do: ${reason || 'Không có lý do cụ thể.'}`,
+      type: 'rejection'
+    });
+
     // Update editor stats
-    db.run(
-      `UPDATE editor_stats SET articlesRejected = articlesRejected + 1, articlesReviewed = articlesReviewed + 1 
-       WHERE editor_id = ?`,
+    await pool.query(
+      `UPDATE editor_stats SET "articlesRejected" = "articlesRejected" + 1, "articlesReviewed" = "articlesReviewed" + 1 
+       WHERE editor_id = $1`,
       [req.user.id]
     );
 
@@ -113,18 +129,16 @@ router.post('/:id/suggest-edit', authMiddleware, roleMiddleware(['editor']), asy
     }
 
     // Store suggestion in a log/comment system
-    db.run(
-      `INSERT INTO comments (id, article_id, user_id, content, status)
-       VALUES (?, ?, ?, ?, 'approved')`,
-      [uuidv4(), req.params.id, req.user.id, suggestion],
-      function(err) {
-        if (err) {
-          res.status(500).json({ message: 'Failed to save suggestion' });
-        } else {
-          res.json({ message: 'Suggestion saved' });
-        }
-      }
-    );
+    try {
+      await pool.query(
+        `INSERT INTO comments (article_id, user_id, content, status)
+         VALUES ($1, $2, $3, 'approved')`,
+        [req.params.id, req.user.id, suggestion]
+      );
+      res.json({ message: 'Suggestion saved' });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to save suggestion' });
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to suggest edit', error: error.message });
   }
@@ -133,17 +147,11 @@ router.post('/:id/suggest-edit', authMiddleware, roleMiddleware(['editor']), asy
 // Get editor stats
 router.get('/stats/me', authMiddleware, roleMiddleware(['editor']), async (req, res) => {
   try {
-    const stats = new Promise((resolve, reject) => {
-      db.get(
-        `SELECT * FROM editor_stats WHERE editor_id = ?`,
-        [req.user.id],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
-    res.json(await stats);
+    const stats = await pool.query(
+      `SELECT * FROM editor_stats WHERE editor_id = $1`,
+      [req.user.id]
+    );
+    res.json(stats.rows[0] || {});
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch stats', error: error.message });
   }

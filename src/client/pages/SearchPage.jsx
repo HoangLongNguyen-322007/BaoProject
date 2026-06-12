@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import ArticleGrid from '../components/ArticleGrid';
-import { searchArticles } from '../../utils/mockData';
+import { articlesAPI } from '../../utils/api';
 import { CATEGORIES } from '../../constant/global';
 import styles from './SearchPage.module.css';
 
@@ -9,16 +9,36 @@ function SearchPage() {
    const [searchParams, setSearchParams] = useSearchParams();
    const query = searchParams.get('q') || '';
    const categoryFilter = searchParams.get('category') || 'all';
+   
    const [selectedCategory, setSelectedCategory] = useState(categoryFilter);
+   const [results, setResults] = useState([]);
+   const [loading, setLoading] = useState(true);
 
-   const results = useMemo(() => {
-      return searchArticles(query, selectedCategory === 'all' ? null : selectedCategory);
+   useEffect(() => {
+      const fetchResults = async () => {
+         setLoading(true);
+         try {
+            const cat = selectedCategory === 'all' ? null : selectedCategory;
+            const data = await articlesAPI.getAll(50, 0, cat, query);
+            setResults(data);
+         } catch (err) {
+            console.error('Failed to fetch search results:', err);
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchResults();
    }, [query, selectedCategory]);
 
    const handleCategoryChange = (categoryId) => {
       setSelectedCategory(categoryId);
       const newParams = new URLSearchParams(searchParams);
-      newParams.set('category', categoryId);
+      if (categoryId === 'all') {
+         newParams.delete('category');
+      } else {
+         newParams.set('category', categoryId);
+      }
       setSearchParams(newParams);
    };
 
@@ -27,12 +47,12 @@ function SearchPage() {
          <div className={styles.container}>
             {/* Search Header */}
             <header className={styles.header}>
-               <h1>Search Results</h1>
+               <h1>Kết quả tìm kiếm</h1>
                {query && (
                   <p className={styles.searchQuery}>
-                     Results for: <strong>"{query}"</strong>
+                     Kết quả cho: <strong>"{query}"</strong>
                      <span className={styles.resultCount}>
-                        ({results.length} {results.length === 1 ? 'result' : 'results'})
+                        ({results.length} kết quả)
                      </span>
                   </p>
                )}
@@ -40,7 +60,7 @@ function SearchPage() {
 
             {/* Filter Section */}
             <section className={styles.filters} aria-label="Filter results">
-               <h2 className={styles.filterTitle}>Filter by Category</h2>
+               <h2 className={styles.filterTitle}>Lọc theo chuyên mục</h2>
                <div className={styles.filterButtons} role="tablist">
                   <button
                      className={`${styles.filterButton} ${selectedCategory === 'all' ? styles.active : ''}`}
@@ -48,14 +68,14 @@ function SearchPage() {
                      role="tab"
                      aria-selected={selectedCategory === 'all'}
                   >
-                     All Categories
+                     Tất cả chuyên mục
                   </button>
                   {CATEGORIES.map((category) => (
                      <button
                         key={category.id}
                         className={`${styles.filterButton} ${selectedCategory === category.id ? styles.active : ''}`}
                         onClick={() => handleCategoryChange(category.id)}
-                        style={selectedCategory === category.id ? { backgroundColor: category.color } : {}}
+                        style={selectedCategory === category.id ? { backgroundColor: category.color, color: 'white' } : {}}
                         role="tab"
                         aria-selected={selectedCategory === category.id}
                      >
@@ -67,16 +87,22 @@ function SearchPage() {
 
             {/* Results */}
             <section className={styles.results} aria-label="Search results" aria-live="polite">
-               {query && results.length === 0 ? (
-                  <div className={styles.noResults}>
-                     <h2>No articles found</h2>
-                     <p>Try searching for different keywords or browse all articles.</p>
-                     <Link to="/" className={styles.link}>
-                        Browse All Articles
-                     </Link>
+               {loading ? (
+                  <div className="loading-spinner" style={{ textAlign: 'center', margin: '2rem 0', color: 'var(--gold-primary)' }}>
+                     Đang tìm kiếm...
                   </div>
                ) : (
-                  <ArticleGrid articles={results} />
+                  query && results.length === 0 ? (
+                     <div className={styles.noResults}>
+                        <h2>Không tìm thấy bài viết nào</h2>
+                        <p>Vui lòng thử tìm kiếm bằng các từ khóa khác hoặc duyệt tất cả bài viết.</p>
+                        <Link to="/" className={styles.link}>
+                           Duyệt tất cả bài viết
+                        </Link>
+                     </div>
+                  ) : (
+                     <ArticleGrid articles={results} />
+                  )
                )}
             </section>
          </div>

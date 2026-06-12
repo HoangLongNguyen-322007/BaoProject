@@ -12,6 +12,9 @@ const articlesPublicRoutes = require('../backend/routes/articles-public');
 const articlesAuthorRoutes = require('../backend/routes/articles-author');
 const articlesEditorRoutes = require('../backend/routes/articles-editor');
 const adminRoutes = require('../backend/routes/admin');
+const commentsRoutes = require('../backend/routes/comments');
+const bookmarksRoutes = require('../backend/routes/bookmarks');
+const notificationsRoutes = require('../backend/routes/notifications');
 
 // Create Express app
 const app = express();
@@ -22,11 +25,12 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize database
-initDatabase();
-
-// Seed database (only runs once due to INSERT OR IGNORE)
-seedDatabase();
+// Initialize and seed database
+initDatabase().then(() => {
+  seedDatabase();
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -34,6 +38,9 @@ app.use('/api/articles', articlesPublicRoutes);
 app.use('/api/author/articles', articlesAuthorRoutes);
 app.use('/api/editor/articles', articlesEditorRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/comments', commentsRoutes);
+app.use('/api/bookmarks', bookmarksRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,40 +1,44 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authAPI, tokenStorage } from '../../utils/api';
 import styles from './ProfileEditPage.module.css';
 
 function ProfileEditPage() {
    const navigate = useNavigate();
    const [toastMessage, setToastMessage] = useState('');
    const [activeMenu, setActiveMenu] = useState('profile');
+   const [loading, setLoading] = useState(true);
 
    // Form States
-   const [name, setName] = useState('Nguyễn Văn A');
-   const [username, setUsername] = useState('nguyenvana');
-   const [email, setEmail] = useState('nguyenvana@gmail.com');
-   const [phone, setPhone] = useState('0912 345 678');
-   const [dob, setDob] = useState('1995-05-15');
-   const [gender, setGender] = useState('Nam');
-   const [address, setAddress] = useState('Hà Nội, Việt Nam');
-   const [bio, setBio] = useState('Đam mê đọc báo và cập nhật tin tức mỗi ngày.');
+   const [name, setName] = useState('');
+   const [email, setEmail] = useState('');
+   const [phone, setPhone] = useState('');
+   const [bio, setBio] = useState('');
    const [avatar, setAvatar] = useState('');
 
-   // Load user from localStorage on mount
    useEffect(() => {
       window.scrollTo(0, 0);
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-         const parsed = JSON.parse(savedUser);
-         setName(parsed.name || '');
-         setUsername(parsed.username || '');
-         setEmail(parsed.email || '');
-         setPhone(parsed.phone || '');
-         setDob(parsed.dob || '1995-05-15');
-         setGender(parsed.gender || 'Nam');
-         setAddress(parsed.address || '');
-         setBio(parsed.bio || '');
-         setAvatar(parsed.avatar || '');
-      }
-   }, []);
+      const fetchProfile = async () => {
+         try {
+            const user = await authAPI.getProfile();
+            setName(user.fullName || '');
+            setEmail(user.email || '');
+            setPhone(user.phone || '');
+            setBio(user.bio || '');
+            setAvatar(user.avatar || '');
+         } catch (err) {
+            console.error(err);
+            if (err.message === 'Session expired') {
+               navigate('/login');
+            } else {
+               showToast('Lỗi khi tải thông tin hồ sơ.');
+            }
+         } finally {
+            setLoading(false);
+         }
+      };
+      fetchProfile();
+   }, [navigate]);
 
    const handleAvatarClick = () => {
       const mockAvatars = [
@@ -46,7 +50,7 @@ function ProfileEditPage() {
       // Pick next or random
       const randomIdx = Math.floor(Math.random() * mockAvatars.length);
       setAvatar(mockAvatars[randomIdx]);
-      showToast('Ảnh đại diện đã được cập nhật!');
+      showToast('Ảnh đại diện đã được thay đổi (chưa lưu)!');
    };
 
    const showToast = (msg) => {
@@ -54,7 +58,7 @@ function ProfileEditPage() {
       setTimeout(() => setToastMessage(''), 2500);
    };
 
-   const handleSave = (e) => {
+   const handleSave = async (e) => {
       e.preventDefault();
 
       if (!name.trim()) {
@@ -62,43 +66,31 @@ function ProfileEditPage() {
          return;
       }
 
-      const updatedUser = {
-         name,
-         username,
-         email,
-         phone,
-         dob,
-         gender,
-         address,
-         bio,
-         avatar
-      };
-
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      // Dispatch custom event to notify Header
-      window.dispatchEvent(new Event('auth-change'));
-      
-      showToast('Lưu thay đổi hồ sơ thành công!');
-   };
-
-   const handleCancel = () => {
-      // Re-load saved user
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-         const parsed = JSON.parse(savedUser);
-         setName(parsed.name || '');
-         setPhone(parsed.phone || '');
-         setDob(parsed.dob || '1995-05-15');
-         setGender(parsed.gender || 'Nam');
-         setAddress(parsed.address || '');
-         setBio(parsed.bio || '');
-         setAvatar(parsed.avatar || '');
+      try {
+         const { user } = await authAPI.updateProfile({
+            fullName: name,
+            phone,
+            bio,
+            avatar
+         });
+         
+         // Update token storage for immediate UI reflection if user obj matches
+         const cachedUser = tokenStorage.getUser();
+         if (cachedUser) {
+            tokenStorage.setUser({ ...cachedUser, fullName: name, avatar });
+            window.dispatchEvent(new Event('auth-change'));
+         }
+         
+         showToast('Lưu thay đổi hồ sơ thành công!');
+      } catch (err) {
+         console.error(err);
+         showToast('Lưu thay đổi thất bại: ' + err.message);
       }
-      showToast('Đã hủy bỏ các thay đổi.');
    };
 
    const handleLogout = () => {
-      localStorage.removeItem('user');
+      tokenStorage.clearToken();
+      tokenStorage.clearUser();
       window.dispatchEvent(new Event('auth-change'));
       navigate('/');
    };
@@ -110,6 +102,16 @@ function ProfileEditPage() {
       { id: 'saved', label: 'Bài viết đã lưu', icon: '🔖' },
       { id: 'notifications', label: 'Thông báo', icon: '🔔' }
    ];
+
+   if (loading) {
+      return (
+         <div className={styles.profilePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            <div className="loading-spinner" style={{ fontSize: '1.5rem', color: 'var(--gold-primary)' }}>
+               Đang tải hồ sơ...
+            </div>
+         </div>
+      );
+   }
 
    return (
       <div className={styles.profilePage}>
@@ -184,29 +186,17 @@ function ProfileEditPage() {
                               />
                            </div>
 
-                           {/* Tên đăng nhập */}
-                           <div className={styles.formGroup}>
-                              <label htmlFor="username" className={styles.inputLabel}>Tên đăng nhập</label>
-                              <input
-                                 type="text"
-                                 id="username"
-                                 className={`${styles.input} ${styles.inputDisabled}`}
-                                 value={username}
-                                 disabled
-                              />
-                              <span className={styles.inputHelp}>Tên đăng nhập không thể thay đổi</span>
-                           </div>
-
                            {/* Email */}
                            <div className={styles.formGroup}>
-                              <label htmlFor="email" className={styles.inputLabel}>Email</label>
+                              <label htmlFor="email" className={styles.inputLabel}>Email đăng nhập</label>
                               <input
                                  type="email"
                                  id="email"
-                                 className={styles.input}
+                                 className={`${styles.input} ${styles.inputDisabled}`}
                                  value={email}
-                                 onChange={(e) => setEmail(e.target.value)}
+                                 disabled
                               />
+                              <span className={styles.inputHelp}>Email không thể thay đổi</span>
                            </div>
 
                            {/* Số điện thoại */}
@@ -218,53 +208,6 @@ function ProfileEditPage() {
                                  className={styles.input}
                                  value={phone}
                                  onChange={(e) => setPhone(e.target.value)}
-                              />
-                           </div>
-
-                           {/* Ngày sinh */}
-                           <div className={styles.formGroup}>
-                              <label htmlFor="dob" className={styles.inputLabel}>Ngày sinh</label>
-                              <div className={styles.dateInputWrapper}>
-                                 <input
-                                    type="date"
-                                    id="dob"
-                                    className={styles.input}
-                                    value={dob}
-                                    onChange={(e) => setDob(e.target.value)}
-                                 />
-                              </div>
-                           </div>
-
-                           {/* Giới tính */}
-                           <div className={styles.formGroup}>
-                              <span className={styles.inputLabel}>Giới tính</span>
-                              <div className={styles.radioGroup}>
-                                 {['Nam', 'Nữ', 'Khác'].map((g) => (
-                                    <label key={g} className={styles.radioLabel}>
-                                       <input
-                                          type="radio"
-                                          name="gender"
-                                          value={g}
-                                          checked={gender === g}
-                                          onChange={() => setGender(g)}
-                                          className={styles.radioInput}
-                                       />
-                                       <span className={styles.radioIndicator} />
-                                       {g}
-                                    </label>
-                                 ))}
-                              </div>
-                           </div>
-
-                           {/* Địa chỉ */}
-                           <div className={styles.formGroup}>
-                              <label htmlFor="address" className={styles.inputLabel}>Địa chỉ</label>
-                              <input
-                                 type="text"
-                                 id="address"
-                                 className={styles.input}
-                                 value={address}
-                                 onChange={(e) => setAddress(e.target.value)}
                               />
                            </div>
 
@@ -285,9 +228,6 @@ function ProfileEditPage() {
 
                            {/* Actions */}
                            <div className={styles.formActions}>
-                              <button type="button" className={styles.btnCancel} onClick={handleCancel}>
-                                 Hủy bỏ
-                              </button>
                               <button type="submit" className={styles.btnSave}>
                                  Lưu thay đổi
                               </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authAPI, tokenStorage } from '../../utils/api';
 import styles from './LoginPage.module.css';
 
 function LoginPage() {
@@ -10,7 +11,7 @@ function LoginPage() {
    const [rememberMe, setRememberMe] = useState(false);
    const [error, setError] = useState('');
 
-   const handleSubmit = (e) => {
+   const handleSubmit = async (e) => {
       e.preventDefault();
       if (!username.trim() || !password.trim()) {
          setError('Vui lòng nhập đầy đủ tài khoản và mật khẩu.');
@@ -18,22 +19,15 @@ function LoginPage() {
       }
       setError('');
       
-      // Save mock user to localStorage
-      const mockUser = {
-         name: 'Nguyễn Văn A',
-         username: username.trim(),
-         email: `${username.trim()}@gmail.com`,
-         phone: '0912 345 678',
-         dob: '1995-05-15',
-         gender: 'Nam',
-         address: 'Hà Nội, Việt Nam',
-         bio: 'Đam mê đọc báo và cập nhật tin tức mỗi ngày.',
-         avatar: ''
-      };
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      window.dispatchEvent(new Event('auth-change'));
-      
-      navigate('/');
+      try {
+         const data = await authAPI.login(username.trim(), password);
+         tokenStorage.setToken(data.token);
+         tokenStorage.setUser(data.user);
+         window.dispatchEvent(new Event('auth-change'));
+         navigate('/');
+      } catch (err) {
+         setError(err.message || 'Tài khoản hoặc mật khẩu không chính xác.');
+      }
    };
 
    return (
