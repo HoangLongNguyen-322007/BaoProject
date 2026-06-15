@@ -4,7 +4,6 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const { initDatabase } = require('../backend/config/database');
-const { seedDatabase } = require('../backend/config/seed');
 
 // Import routes
 const authRoutes = require('../backend/routes/auth');
@@ -25,11 +24,10 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize and seed database
-initDatabase().then(() => {
-  seedDatabase();
-}).catch(err => {
+// Initialize database (run pending migrations)
+initDatabase().catch((err) => {
   console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
 
 // Routes

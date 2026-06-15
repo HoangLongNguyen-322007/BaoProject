@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const commentRepository = require('../Repositories/commentRepository');
 const articleRepository = require('../Repositories/articleRepository');
+const notificationRepository = require('../Repositories/notificationRepository');
 const { authMiddleware, roleMiddleware, optionalAuth } = require('../Middleware/auth');
 
 // Post a comment (authenticated users)
@@ -29,12 +30,34 @@ router.post('/:articleId', authMiddleware, async (req, res) => {
       content
     });
 
+    // Notify author of the article if commenter is different
+    if (article.author_id !== req.user.id) {
+      await notificationRepository.create({
+        user_id: article.author_id,
+        title: 'Bình luận mới',
+        message: `Độc giả (${req.user.email}) đã bình luận về bài viết "${article.title}": "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+        type: 'comment',
+        relatedId: article.id
+      });
+    }
+
     res.status(201).json({
       message: 'Comment submitted successfully, awaiting approval',
       comment
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to submit comment', error: error.message });
+  }
+});
+
+// Retrieve my comments (authenticated users)
+router.get('/my-comments', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const comments = await commentRepository.findByUser(userId);
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch comments', error: error.message });
   }
 });
 

@@ -45,6 +45,18 @@ class CommentRepository {
     await pool.query(`DELETE FROM comments WHERE id = $1`, [id]);
     return { success: true };
   }
+
+  async findByUser(userId) {
+    const result = await pool.query(
+      `SELECT c.*, a.title as "articleTitle"
+       FROM comments c
+       JOIN articles a ON c.article_id = a.id
+       WHERE c.user_id = $1
+       ORDER BY c."createdAt" DESC`,
+      [userId]
+    );
+    return result.rows;
+  }
 }
 
 module.exports = new CommentRepository();

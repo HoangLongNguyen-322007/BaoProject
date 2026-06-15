@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {
@@ -15,138 +15,85 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
-// Initialize database schema
+/**
+ * Initialize database bằng cách chạy migration runner.
+ * Các migration files được quản lý trong src/backend/database/migrations/
+ */
 const initDatabase = async () => {
+  const path = require('path');
+  const fs = require('fs');
+
+  const migrationsDir = path.join(__dirname, '../database/migrations');
   const client = await pool.connect();
+
   try {
-    await client.query('BEGIN');
-
-    // Enable UUID extension
-    await client.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
-
-    // Users table
+    // Đảm bảo bảng migrations tồn tại
     await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        "fullName" TEXT NOT NULL,
-        avatar TEXT,
-        role TEXT CHECK(role IN ('author', 'editor', 'admin', 'guest')) DEFAULT 'guest',
-        bio TEXT,
-        phone TEXT,
-        status TEXT CHECK(status IN ('active', 'inactive', 'suspended')) DEFAULT 'active',
-        "createdAt" TIMESTAMPTZ DEFAULT NOW(),
-        "updatedAt" TIMESTAMPTZ DEFAULT NOW()
+      CREATE TABLE IF NOT EXISTS migrations (
+        id          SERIAL PRIMARY KEY,
+        name        TEXT UNIQUE NOT NULL,
+        "appliedAt" TIMESTAMPTZ DEFAULT NOW()
       )
     `);
 
-    // Articles table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS articles (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title TEXT NOT NULL,
-        excerpt TEXT,
-        content TEXT NOT NULL,
-        category TEXT NOT NULL,
-        author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        editor_id UUID REFERENCES users(id),
-        status TEXT CHECK(status IN ('draft', 'pending', 'approved', 'rejected', 'published')) DEFAULT 'draft',
-        image TEXT,
-        "readTime" INTEGER DEFAULT 5,
-        views INTEGER DEFAULT 0,
-        likes INTEGER DEFAULT 0,
-        "publishedAt" TIMESTAMPTZ,
-        "rejectionReason" TEXT,
-        "createdAt" TIMESTAMPTZ DEFAULT NOW(),
-        "updatedAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+    // Lấy danh sách migrations đã chạy
+    const { rows: appliedMigrations } = await client.query(
+      `SELECT name FROM migrations ORDER BY id`
+    );
+    const applied = new Set(appliedMigrations.map((r) => r.name));
 
-    // Categories table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS categories (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name TEXT UNIQUE NOT NULL,
-        slug TEXT UNIQUE NOT NULL,
-        description TEXT,
-        color TEXT,
-        icon TEXT,
-        "createdAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+    // Đọc và chạy migration files chưa được áp dụng
+    const migrationFiles = fs
+      .readdirSync(migrationsDir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort();
 
-    // Comments table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS comments (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE,
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        status TEXT CHECK(status IN ('pending', 'approved', 'rejected')) DEFAULT 'approved',
-        "createdAt" TIMESTAMPTZ DEFAULT NOW(),
-        "updatedAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+    let newCount = 0;
+    for (const file of migrationFiles) {
+      if (applied.has(file)) continue;
 
-    // Editor stats table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS editor_stats (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        editor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        "articlesReviewed" INTEGER DEFAULT 0,
-        "articlesApproved" INTEGER DEFAULT 0,
-        "articlesRejected" INTEGER DEFAULT 0,
-        "approvalRate" REAL DEFAULT 0,
-        "updatedAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+      await client.query('BEGIN');
+      try {
+        await client.query(sql);
+        await client.query(`INSERT INTO migrations (name) VALUES ($1)`, [file]);
+        await client.query('COMMIT');
+        newCount++;
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw new Error(`Migration ${file} failed: ${err.message}`);
+      }
+    }
 
-    // System logs table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS system_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        action TEXT NOT NULL,
-        user_id UUID REFERENCES users(id),
-        description TEXT,
-        metadata TEXT,
-        "createdAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
-
-    // Bookmarks table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS bookmarks (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE,
-        "createdAt" TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(user_id, article_id)
-      )
-    `);
-
-    // Notifications table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS notifications (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        title TEXT NOT NULL,
-        message TEXT NOT NULL,
-        type TEXT CHECK(type IN ('system', 'approval', 'rejection', 'comment')) DEFAULT 'system',
-        "isRead" BOOLEAN DEFAULT FALSE,
-        "createdAt" TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
-
-    await client.query('COMMIT');
-    console.log('✓ Database schema initialized (PostgreSQL)');
+    if (newCount > 0) {
+      console.log(`✓ Applied ${newCount} new database migration(s)`);
+    } else {
+      console.log('✓ Database schema is up to date');
+    }
   } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('Error initializing database schema:', err);
+    console.error('Error during database initialization:', err.message);
     throw err;
   } finally {
     client.release();
   }
 };
 
-module.exports = { pool, initDatabase };
+/**
+ * Helper: chạy một query với error logging
+ */
+const runQuery = async (text, params = []) => {
+  const start = Date.now();
+  try {
+    const res = await pool.query(text, params);
+    const duration = Date.now() - start;
+    if (process.env.NODE_ENV === 'development' && duration > 500) {
+      console.warn(`⚠ Slow query (${duration}ms):`, text.substring(0, 80));
+    }
+    return res;
+  } catch (err) {
+    console.error('Query error:', { text: text.substring(0, 100), params, error: err.message });
+    throw err;
+  }
+};
+
+module.exports = { pool, initDatabase, runQuery };

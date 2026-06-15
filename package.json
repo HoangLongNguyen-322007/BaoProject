@@ -28,7 +28,12 @@
       "dev:server": "node src/server/app.js",
       "build": "vite build",
       "test": "react-scripts test",
-      "eject": "react-scripts eject"
+      "eject": "react-scripts eject",
+      "db:migrate": "node src/backend/database/migrate.js",
+      "db:seed": "node src/backend/config/seed.js",
+      "db:reset": "node src/backend/database/reset.js --confirm",
+      "db:setup": "node src/backend/database/setup.js",
+      "db:reset-full": "npm run db:reset && npm run db:setup"
    },
    "eslintConfig": {
       "extends": [

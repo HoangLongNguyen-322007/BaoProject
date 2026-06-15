@@ -77,6 +77,15 @@ class UserRepository {
     await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
     return { success: true };
   }
+
+  async updatePassword(id, hashedPassword) {
+    const result = await pool.query(
+      `UPDATE users SET password = $1, "updatedAt" = NOW()
+       WHERE id = $2 RETURNING id, email`,
+      [hashedPassword, id]
+    );
+    return result.rows[0];
+  }
 }
 
 module.exports = new UserRepository();

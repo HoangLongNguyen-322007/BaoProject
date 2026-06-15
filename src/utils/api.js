@@ -181,6 +181,17 @@ const getMockFallback = (method, endpoint, data) => {
       if (path === '/notifications') {
          return [];
       }
+
+      // 9. My comments
+      if (path === '/comments/my-comments') {
+         return [];
+      }
+   }
+
+   if (method === 'PUT') {
+      if (path === '/auth/change-password') {
+         return { message: 'Đổi mật khẩu thành công' };
+      }
    }
 
    if (method === 'POST') {
@@ -302,6 +313,9 @@ const authAPI = {
    getProfile: () => apiCall('GET', '/auth/me'),
 
    updateProfile: (data) => apiCall('PUT', '/auth/me', data),
+
+   changePassword: (currentPassword, newPassword) =>
+      apiCall('PUT', '/auth/change-password', { currentPassword, newPassword }),
 };
 
 // ARTICLES PUBLIC API
@@ -405,6 +419,8 @@ const commentsAPI = {
    delete: (commentId) => apiCall('DELETE', `/comments/${commentId}`),
 
    updateStatus: (commentId, status) => apiCall('PUT', `/comments/${commentId}/status`, { status }),
+
+   getMyComments: () => apiCall('GET', '/comments/my-comments'),
 };
 
 // BOOKMARKS API
