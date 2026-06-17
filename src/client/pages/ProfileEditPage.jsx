@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI, commentsAPI, bookmarksAPI, notificationsAPI, tokenStorage } from '../../utils/api';
 import styles from './ProfileEditPage.module.css';
@@ -8,6 +8,7 @@ function ProfileEditPage() {
    const [toastMessage, setToastMessage] = useState('');
    const [activeMenu, setActiveMenu] = useState('profile');
    const [loading, setLoading] = useState(true);
+   const fileInputRef = useRef(null);
 
     // Form States
     const [name, setName] = useState('');
@@ -172,16 +173,32 @@ function ProfileEditPage() {
    };
 
    const handleAvatarClick = () => {
-      const mockAvatars = [
-         'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&q=80',
-         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80',
-         'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&h=150&fit=crop&q=80',
-         'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&q=80'
-      ];
-      // Pick next or random
-      const randomIdx = Math.floor(Math.random() * mockAvatars.length);
-      setAvatar(mockAvatars[randomIdx]);
-      showToast('Ảnh đại diện đã được thay đổi (chưa lưu)!');
+      if (fileInputRef.current) {
+         fileInputRef.current.click();
+      }
+   };
+
+   const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.match('image.*')) {
+         showToast('Vui lòng chọn file hình ảnh (JPG, PNG).');
+         return;
+      }
+
+      if (file.size > 4 * 1024 * 1024) {
+         showToast('Kích thước ảnh không được vượt quá 4MB.');
+         return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+         setAvatar(event.target.result);
+         showToast('Ảnh đại diện đã được thay đổi (nhấn Lưu để cập nhật)!');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = ''; // Reset input
    };
 
    const showToast = (msg) => {
@@ -290,6 +307,13 @@ function ProfileEditPage() {
                            {/* Avatar Selection */}
                            <div className={styles.avatarSection}>
                               <span className={styles.inputLabel}>Ảnh đại diện</span>
+                              <input 
+                                 type="file" 
+                                 accept="image/jpeg, image/png, image/webp" 
+                                 ref={fileInputRef} 
+                                 onChange={handleFileChange} 
+                                 style={{ display: 'none' }} 
+                              />
                               <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
                                  {avatar ? (
                                     <img src={avatar} className={styles.avatarImg} alt="Avatar" />
@@ -302,7 +326,7 @@ function ProfileEditPage() {
                                     📷
                                  </div>
                               </div>
-                              <span className={styles.avatarTips}>JPG, PNG. Kích thước tối đa 2MB</span>
+                              <span className={styles.avatarTips}>JPG, PNG. Kích thước tối đa 4MB</span>
                            </div>
 
                            {/* Họ và tên */}

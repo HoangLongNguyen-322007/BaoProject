@@ -1,26 +1,20 @@
-:root {
-   --bg-dark: #0b0b0c;
-   --bg-panel: #0f1113;
-   --bg-hover: rgba(255, 255, 255, 0.04);
-   --text-primary: #e8e8e8;
-   --text-muted: #9aa0a6;
-   --gold: #e4b24a;
-   --gold-hover: #ffb84d;
-   --border: 1px solid rgba(255, 255, 255, 0.08);
+.adminDashboard {
+   --bg-dark: var(--bg-primary);
+   --bg-panel: var(--bg-secondary);
+   --bg-hover-custom: var(--bg-hover);
+   --text-primary-custom: var(--text-primary);
+   --text-muted-custom: var(--text-secondary);
+   --gold: var(--gold-primary);
+   --gold-hover: var(--gold-hover);
+   --border: 1px solid var(--border-color);
    --success: #4caf50;
    --warning: #ff9800;
    --error: #f44336;
-}
 
-* {
-   box-sizing: border-box;
-}
-
-.adminDashboard {
    display: flex;
    min-height: 100vh;
-   background: linear-gradient(180deg, #060606 0%, #0b0b0c 100%);
-   color: var(--text-primary);
+   background: var(--bg-primary);
+   color: var(--text-primary-custom);
    font-family: inherit;
 }
 
@@ -54,7 +48,7 @@
 .sidebarSub {
    display: block;
    font-size: 0.75rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin-top: 0.2rem;
 }
 
@@ -72,7 +66,7 @@
    padding: 0.7rem 1rem;
    border: none;
    background: transparent;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    cursor: pointer;
    border-radius: 6px;
    transition: all 0.2s;
@@ -82,8 +76,8 @@
 }
 
 .navItem:hover {
-   background: var(--bg-hover);
-   color: var(--text-primary);
+   background: var(--bg-hover-custom);
+   color: var(--text-primary-custom);
 }
 
 .navItemActive {
@@ -167,7 +161,7 @@
 
 .statLabel {
    font-size: 0.85rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .statValue {
@@ -195,11 +189,11 @@
    font-size: 1.1rem;
    margin-top: 0;
    margin-bottom: 1.2rem;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
 }
 
 .chartPlaceholder {
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    padding: 1.5rem;
    border-radius: 8px;
 }
@@ -222,7 +216,7 @@
    padding-bottom: 0.5rem;
    font-size: 0.75rem;
    font-weight: 600;
-   color: #111;
+   color: var(--text-primary-custom);
    min-height: 50px;
 }
 
@@ -238,7 +232,7 @@
    gap: 1rem;
    align-items: center;
    padding: 0.8rem;
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    border-radius: 6px;
    font-size: 0.9rem;
    line-height: 1.4;
@@ -251,7 +245,7 @@
 
 .activityTime {
    margin-left: auto;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.8rem;
    flex-shrink: 0;
 }
@@ -275,7 +269,7 @@
    background: var(--bg-panel);
    border: var(--border);
    border-radius: 6px;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    font-size: 0.95rem;
 }
 
@@ -291,7 +285,7 @@
 .btnPrimary {
    padding: 0.7rem 1.5rem;
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
    border: none;
    border-radius: 6px;
    font-weight: 600;
@@ -317,11 +311,11 @@
    grid-template-columns: 80px 2fr 150px 120px 130px 150px;
    gap: 1rem;
    padding: 1rem;
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    border-bottom: var(--border);
    font-weight: 600;
    font-size: 0.9rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .tableRow {
@@ -329,13 +323,13 @@
    grid-template-columns: 80px 2fr 150px 120px 130px 150px;
    gap: 1rem;
    padding: 1rem;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+   border-bottom: var(--border);
    align-items: center;
    transition: background 0.2s;
 }
 
 .tableRow:hover {
-   background: var(--bg-hover);
+   background: var(--bg-hover-custom);
 }
 
 .tableRow:last-child {
@@ -344,7 +338,7 @@
 
 .title {
    font-weight: 600;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    overflow: hidden;
    text-overflow: ellipsis;
    white-space: nowrap;
@@ -378,8 +372,8 @@
 .btnSmall {
    padding: 0.4rem 0.8rem;
    background: transparent;
-   border: 1px solid rgba(255, 255, 255, 0.1);
-   color: var(--text-muted);
+   border: 1px solid var(--border-color);
+   color: var(--text-muted-custom);
    border-radius: 4px;
    font-size: 0.8rem;
    cursor: pointer;
@@ -460,7 +454,7 @@
 }
 
 .categoryCard p {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin: 0 0 1rem 0;
    font-size: 0.9rem;
 }
@@ -500,7 +494,7 @@
 
 .settingRow label {
    display: block;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    font-weight: 500;
    min-width: 180px;
 }
@@ -513,10 +507,10 @@
 .settingTextarea {
    flex: 1;
    padding: 0.7rem 1rem;
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    border: var(--border);
    border-radius: 6px;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    font-size: 0.95rem;
    font-family: inherit;
 }

@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import styles from './Header.module.css';
 import ThemeToggle from './ThemeToggle/ThemeToggle';
+import { CATEGORIES } from '../../constant/global';
 
 const NAV_ITEMS = [
    { label: 'Trang Chủ', path: '/', id: 'home' },
@@ -311,6 +312,26 @@ function Header() {
                </div>
             </div>
          </nav>
+
+         {/* Mega Menu Overlay */}
+         <div className={`${styles.megaMenuOverlay} ${menuOpen ? styles.megaMenuOpen : ''}`}>
+            <div className={styles.megaMenuContainer}>
+               <h3 className={styles.megaMenuTitle}>TẤT CẢ CHUYÊN MỤC</h3>
+               <div className={styles.megaMenuGrid}>
+                  {CATEGORIES.map(cat => (
+                     <Link
+                        key={cat.id}
+                        to={`/category/${cat.slug}`}
+                        className={styles.megaMenuItem}
+                        onClick={() => setMenuOpen(false)}
+                     >
+                        <span className={styles.megaMenuColor} style={{ backgroundColor: cat.color }}></span>
+                        {cat.name}
+                     </Link>
+                  ))}
+               </div>
+            </div>
+         </div>
       </header>
    );
 }

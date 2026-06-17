@@ -1,12 +1,12 @@
 :root {
-   --bg-dark: #0b0b0c;
-   --bg-panel: #0f1113;
+   --bg-primary: #0b0b0c;
+   --bg-secondary: #0f1113;
    --bg-hover: rgba(255, 255, 255, 0.04);
    --text-primary: #e8e8e8;
-   --text-muted: #9aa0a6;
-   --gold: #e4b24a;
+   --text-secondary: #9aa0a6;
+   --gold-primary: #e4b24a;
    --gold-hover: #ffb84d;
-   --border: 1px solid rgba(255, 255, 255, 0.08);
+   --border-color: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -14,10 +14,22 @@
 }
 
 .authorDashboard {
+   --bg-dark: var(--bg-primary);
+   --bg-panel: var(--bg-secondary);
+   --bg-hover-custom: var(--bg-hover);
+   --text-primary-custom: var(--text-primary);
+   --text-muted-custom: var(--text-secondary);
+   --gold: var(--gold-primary);
+   --gold-hover: var(--gold-hover);
+   --border: 1px solid var(--border-color);
+   --success: #4caf50;
+   --warning: #ff9800;
+   --error: #f44336;
+
    display: flex;
    min-height: 100vh;
-   background: linear-gradient(180deg, #060606 0%, #0b0b0c 100%);
-   color: var(--text-primary);
+   background: var(--bg-primary);
+   color: var(--text-primary-custom);
    font-family: inherit;
 }
 
@@ -51,7 +63,7 @@
 .sidebarSub {
    display: block;
    font-size: 0.75rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin-top: 0.2rem;
 }
 
@@ -69,7 +81,7 @@
    padding: 0.7rem 1rem;
    border: none;
    background: transparent;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    cursor: pointer;
    border-radius: 6px;
    transition: all 0.2s;
@@ -78,8 +90,8 @@
 }
 
 .navItem:hover {
-   background: var(--bg-hover);
-   color: var(--text-primary);
+   background: var(--bg-hover-custom);
+   color: var(--text-primary-custom);
 }
 
 .navItemActive {
@@ -152,7 +164,7 @@
 
 .statLabel {
    font-size: 0.85rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .statValue {
@@ -236,12 +248,12 @@
    font-weight: 700;
    margin: 0 0 0.5rem 0;
    line-height: 1.4;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
 }
 
 .cardExcerpt {
    font-size: 0.8rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin: 0 0 0.6rem 0;
    line-height: 1.4;
    display: -webkit-box;
@@ -253,7 +265,7 @@
 
 .cardMeta {
    font-size: 0.75rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin-bottom: 0.8rem;
    display: flex;
    gap: 0.3rem;
@@ -268,7 +280,7 @@
    flex: 1;
    padding: 0.4rem 0.6rem;
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
    border: none;
    border-radius: 6px;
    font-size: 0.8rem;
@@ -285,8 +297,8 @@
    flex: 1;
    padding: 0.4rem 0.6rem;
    background: transparent;
-   color: var(--text-muted);
-   border: 1px solid rgba(255, 255, 255, 0.1);
+   color: var(--text-muted-custom);
+   border: 1px solid var(--border-color);
    border-radius: 6px;
    font-size: 0.8rem;
    cursor: pointer;
@@ -294,7 +306,8 @@
 }
 
 .btnSmallGhost:hover {
-   border-color: var(--text-muted);
+   border-color: var(--text-primary-custom);
+   color: var(--text-primary-custom);
 }
 
 /* ========== EDITOR PANEL ========== */
@@ -323,7 +336,7 @@
    font-size: 0.9rem;
    font-weight: 600;
    margin-bottom: 0.5rem;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
 }
 
 .inputField {
@@ -331,7 +344,7 @@
    background: var(--bg-panel);
    border: var(--border);
    border-radius: 6px;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    font-size: 0.95rem;
    transition: all 0.2s;
 }
@@ -354,15 +367,15 @@
    gap: 0.5rem;
    padding: 0.8rem;
    border-bottom: var(--border);
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    flex-wrap: wrap;
 }
 
 .toolbar button {
    padding: 0.4rem 0.7rem;
    background: transparent;
-   border: 1px solid rgba(255, 255, 255, 0.1);
-   color: var(--text-muted);
+   border: 1px solid var(--border-color);
+   color: var(--text-muted-custom);
    border-radius: 4px;
    cursor: pointer;
    font-size: 0.85rem;
@@ -387,7 +400,7 @@
    padding: 1rem;
    background: transparent;
    border: none;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    font-size: 0.95rem;
    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
    resize: vertical;
@@ -408,7 +421,7 @@
 .btnPrimary {
    padding: 0.7rem 1.5rem;
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
    border: none;
    border-radius: 6px;
    font-weight: 600;
@@ -423,8 +436,8 @@
 .btnOutline {
    padding: 0.7rem 1.5rem;
    background: transparent;
-   color: var(--text-primary);
-   border: 1px solid var(--text-muted);
+   color: var(--text-primary-custom);
+   border: 1px solid var(--text-muted-custom);
    border-radius: 6px;
    font-weight: 600;
    cursor: pointer;
@@ -432,14 +445,14 @@
 }
 
 .btnOutline:hover {
-   border-color: var(--text-primary);
+   border-color: var(--text-primary-custom);
 }
 
 .btnPrimaryFull {
    width: 100%;
    padding: 0.8rem;
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
    border: none;
    border-radius: 6px;
    font-weight: 600;
@@ -457,8 +470,8 @@
    width: 100%;
    padding: 0.8rem;
    background: transparent;
-   color: var(--text-primary);
-   border: 1px solid var(--text-muted);
+   color: var(--text-primary-custom);
+   border: 1px solid var(--text-muted-custom);
    border-radius: 6px;
    font-weight: 600;
    font-size: 0.95rem;
@@ -467,7 +480,7 @@
 }
 
 .btnOutlineFull:hover {
-   border-color: var(--text-primary);
+   border-color: var(--text-primary-custom);
 }
 
 /* ========== PROFILE PANEL ========== */
@@ -507,7 +520,7 @@
 
 .profileHeader p {
    margin: 0;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.9rem;
 }
 
@@ -525,7 +538,7 @@
 }
 
 .statItem .statLabel {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.85rem;
    display: block;
    margin-bottom: 0.5rem;
@@ -551,12 +564,12 @@
 }
 
 .detailRow label {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-weight: 600;
 }
 
 .detailRow span {
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
 }
 
 /* ========== RESPONSIVE ========== */

@@ -8,6 +8,12 @@ export const CATEGORIES = [
    { id: 'health', name: 'Sức Khỏe', slug: 'health', color: '#DD6B20' },
    { id: 'education', name: 'Giáo Dục', slug: 'education', color: '#B7791F' },
    { id: 'travel', name: 'Du Lịch', slug: 'travel', color: '#2C7A7B' },
+   { id: 'khoahoc', name: 'Khoa Học', slug: 'khoahoc', color: '#00B5D8' },
+   { id: 'phapluat', name: 'Pháp Luật', slug: 'phapluat', color: '#4A5568' },
+   { id: 'xe', name: 'Xe', slug: 'xe', color: '#718096' },
+   { id: 'doisong', name: 'Đời Sống', slug: 'doisong', color: '#F6AD55' },
+   { id: 'tamsu', name: 'Tâm Sự', slug: 'tamsu', color: '#ED64A6' },
+   { id: 'ykien', name: 'Ý Kiến', slug: 'ykien', color: '#6B46C1' },
 ];
 
 export const CATEGORY_MAP = {
@@ -20,6 +26,10 @@ export const CATEGORY_MAP = {
    health: { name: 'Sức Khỏe', color: '#DD6B20' },
    education: { name: 'Giáo Dục', color: '#B7791F' },
    travel: { name: 'Du Lịch', color: '#2C7A7B' },
-   lifestyle: { name: 'Đời Sống', color: '#2C7A7B' },
-   politics: { name: 'Chính Trị', color: '#E53E3E' },
+   khoahoc: { name: 'Khoa Học', color: '#00B5D8' },
+   phapluat: { name: 'Pháp Luật', color: '#4A5568' },
+   xe: { name: 'Xe', color: '#718096' },
+   doisong: { name: 'Đời Sống', color: '#F6AD55' },
+   tamsu: { name: 'Tâm Sự', color: '#ED64A6' },
+   ykien: { name: 'Ý Kiến', color: '#6B46C1' },
 };
