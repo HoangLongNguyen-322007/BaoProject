@@ -47,11 +47,8 @@ class ArticleRepository {
 
   async findPublished(limit = 50, offset = 0) {
     const result = await pool.query(
-      `SELECT a.*, u."fullName" as "authorName", u.avatar as "authorAvatar"
-       FROM articles a
-       LEFT JOIN users u ON a.author_id = u.id
-       WHERE a.status = 'published'
-       ORDER BY a."publishedAt" DESC
+      `SELECT * FROM v_published_articles
+       ORDER BY "publishedAt" DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
@@ -60,11 +57,9 @@ class ArticleRepository {
 
   async findByCategory(category, limit = 50, offset = 0) {
     const result = await pool.query(
-      `SELECT a.*, u."fullName" as "authorName"
-       FROM articles a
-       LEFT JOIN users u ON a.author_id = u.id
-       WHERE a.category = $1 AND a.status = 'published'
-       ORDER BY a."publishedAt" DESC
+      `SELECT * FROM v_published_articles
+       WHERE category = $1
+       ORDER BY "publishedAt" DESC
        LIMIT $2 OFFSET $3`,
       [category, limit, offset]
     );
@@ -142,16 +137,53 @@ class ArticleRepository {
     return { success: true };
   }
 
+  async getSuggestions(query) {
+    if (!query || !query.trim()) {
+      return { articles: [], tags: [] };
+    }
+    const cleanQuery = query.trim();
+    
+    // 1. Get matching articles (limit 4)
+    const articlesResult = await pool.query(
+      `SELECT id, title, image, category 
+       FROM v_published_articles
+       WHERE title ILIKE $1 OR excerpt ILIKE $1
+       ORDER BY "publishedAt" DESC
+       LIMIT 4`,
+      [`%${cleanQuery}%`]
+    );
+
+    // 2. Get matching tags (limit 3)
+    const tagsResult = await pool.query(
+      `SELECT name 
+       FROM tags 
+       WHERE name ILIKE $1 
+       ORDER BY "articleCount" DESC 
+       LIMIT 3`,
+      [`%${cleanQuery}%`]
+    );
+
+    return {
+      articles: articlesResult.rows,
+      tags: tagsResult.rows.map(t => t.name)
+    };
+  }
+
   async search(query, limit = 50, offset = 0) {
+    if (!query || !query.trim()) {
+      return this.findPublished(limit, offset);
+    }
+    const cleanQuery = query.trim();
     const result = await pool.query(
-      `SELECT a.*, u."fullName" as "authorName"
-       FROM articles a
-       LEFT JOIN users u ON a.author_id = u.id
-       WHERE (a.title ILIKE $1 OR a.excerpt ILIKE $1 OR a.content ILIKE $1)
-         AND a.status = 'published'
-       ORDER BY a."publishedAt" DESC
-       LIMIT $2 OFFSET $3`,
-      [`%${query}%`, limit, offset]
+      `SELECT *, ts_rank(search_vector, plainto_tsquery('simple', $1)) as rank
+       FROM v_published_articles
+       WHERE search_vector @@ plainto_tsquery('simple', $1)
+          OR title ILIKE $2
+          OR excerpt ILIKE $2
+          OR content ILIKE $2
+       ORDER BY rank DESC, "publishedAt" DESC
+       LIMIT $3 OFFSET $4`,
+      [cleanQuery, `%${cleanQuery}%`, limit, offset]
     );
     return result.rows;
   }

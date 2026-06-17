@@ -214,7 +214,7 @@ Trong đó, khu vực nông, lâm nghiệp và thủy sản tăng 3,28%; khu v�
       id: 14,
       title: 'Lifestyle: Travel Trends for Summer',
       excerpt: 'Experts predict popular destinations and travel styles for the upcoming summer season.',
-      category: 'lifestyle',
+      category: 'travel',
       author: 'James Wilson',
       date: new Date('2026-05-24'),
       content: `As summer approaches, travel experts are already identifying the most popular destinations and emerging travel trends.`,

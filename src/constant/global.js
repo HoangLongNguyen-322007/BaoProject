@@ -7,7 +7,7 @@ export const CATEGORIES = [
    { id: 'entertainment', name: 'Giải Trí', slug: 'entertainment', color: '#805AD5' },
    { id: 'health', name: 'Sức Khỏe', slug: 'health', color: '#DD6B20' },
    { id: 'education', name: 'Giáo Dục', slug: 'education', color: '#B7791F' },
-   { id: 'lifestyle', name: 'Đời Sống', slug: 'lifestyle', color: '#2C7A7B' },
+   { id: 'travel', name: 'Du Lịch', slug: 'travel', color: '#2C7A7B' },
 ];
 
 export const CATEGORY_MAP = {
@@ -19,6 +19,7 @@ export const CATEGORY_MAP = {
    entertainment: { name: 'Giải Trí', color: '#805AD5' },
    health: { name: 'Sức Khỏe', color: '#DD6B20' },
    education: { name: 'Giáo Dục', color: '#B7791F' },
+   travel: { name: 'Du Lịch', color: '#2C7A7B' },
    lifestyle: { name: 'Đời Sống', color: '#2C7A7B' },
    politics: { name: 'Chính Trị', color: '#E53E3E' },
 };

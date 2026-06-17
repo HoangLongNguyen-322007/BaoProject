@@ -3,8 +3,8 @@
    ============================================================ */
 
 .articlePage {
-   background: #0E0E0E;
-   color: #E8E8E8;
+   background: transparent;
+   color: var(--text-primary);
    min-height: 100vh;
    padding-bottom: 4rem;
    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -24,11 +24,11 @@
    gap: 0.5rem;
    margin-bottom: 2rem;
    font-size: 0.8rem;
-   color: rgba(255, 255, 255, 0.5);
+   color: var(--text-muted);
 }
 
 .breadcrumb a {
-   color: rgba(255, 255, 255, 0.5);
+   color: var(--text-muted);
    text-decoration: none;
    transition: color 0.2s ease;
 }
@@ -38,11 +38,11 @@
 }
 
 .breadcrumbSeparator {
-   color: rgba(255, 255, 255, 0.25);
+   color: var(--text-muted);
 }
 
 .breadcrumbCurrent {
-   color: rgba(255, 255, 255, 0.8);
+   color: var(--text-primary);
    font-weight: 500;
 }
 
@@ -56,7 +56,13 @@
 
 /* --- MAIN COLUMN (LEFT) --- */
 .mainColumn {
-   background: transparent;
+   background: var(--glass-bg);
+   padding: 2.5rem;
+   border-radius: 16px;
+   border: 1px solid var(--glass-border);
+   box-shadow: var(--shadow-lg);
+   backdrop-filter: var(--glass-blur);
+   -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .badgeWrapper {
@@ -79,7 +85,7 @@
 
 .categoryBadge:hover {
    background: var(--category-color);
-   color: #0E0E0E;
+   color: var(--bg-primary);
 }
 
 .title {
@@ -97,10 +103,10 @@
    align-items: center;
    flex-wrap: wrap;
    gap: 1.5rem;
-   color: rgba(255, 255, 255, 0.5);
+   color: var(--text-muted);
    font-size: 0.8rem;
    padding-bottom: 1.2rem;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+   border-bottom: 1px solid var(--bg-border);
    margin-bottom: 1.5rem;
 }
 
@@ -114,7 +120,7 @@
 
 .authorName {
    font-weight: 600;
-   color: rgba(255, 255, 255, 0.8);
+   color: var(--text-primary);
 }
 
 .metaIcon {
@@ -125,7 +131,7 @@
 .sapo {
    font-size: 1.1rem;
    line-height: 1.6;
-   color: rgba(255, 255, 255, 0.75);
+   color: var(--text-secondary);
    margin-bottom: 1.8rem;
    font-weight: 500;
    text-align: justify;
@@ -138,8 +144,8 @@
    display: flex;
    justify-content: space-between;
    align-items: center;
-   border-top: 1px solid rgba(255, 255, 255, 0.08);
-   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+   border-top: 1px solid var(--bg-border);
+   border-bottom: 1px solid var(--bg-border);
    padding: 0.7rem 0;
    margin-bottom: 2rem;
    flex-wrap: wrap;
@@ -155,13 +161,13 @@
 
 .toolbarLabel {
    font-size: 0.8rem;
-   color: rgba(255, 255, 255, 0.4);
+   color: var(--text-muted);
 }
 
 .aaLabel {
    font-size: 0.95rem;
    font-weight: 700;
-   color: rgba(255, 255, 255, 0.7);
+   color: var(--text-secondary);
    margin-right: 0.2rem;
 }
 
@@ -173,9 +179,9 @@
    width: 30px;
    height: 30px;
    border-radius: 50%;
-   border: 1px solid rgba(255, 255, 255, 0.15);
-   background: rgba(255, 255, 255, 0.04);
-   color: rgba(255, 255, 255, 0.75);
+   border: 1px solid var(--bg-border);
+   background: var(--bg-border);
+   color: var(--text-secondary);
    cursor: pointer;
    transition: all 0.2s ease;
 }
@@ -183,7 +189,7 @@
 .toolBtn:hover,
 .adjustBtn:hover {
    border-color: rgb(221, 180, 107);
-   color: #FFF;
+   color: var(--text-white);
    background: rgba(221, 180, 107, 0.1);
 }
 
@@ -205,13 +211,13 @@
 .adjustBtn:disabled {
    opacity: 0.25;
    cursor: not-allowed;
-   border-color: rgba(255, 255, 255, 0.1);
+   border-color: var(--bg-border);
    background: transparent;
 }
 
 .fontSizePercent {
    font-size: 0.8rem;
-   color: rgba(255, 255, 255, 0.6);
+   color: var(--text-secondary);
    min-width: 42px;
    text-align: center;
 }
@@ -219,7 +225,7 @@
 .toolbarDivider {
    width: 1px;
    height: 16px;
-   background: rgba(255, 255, 255, 0.12);
+   background: var(--bg-border);
    margin: 0 0.3rem;
 }
 
@@ -241,15 +247,15 @@
 .heroCaption {
    padding: 0.6rem 0;
    font-size: 0.8rem;
-   color: rgba(255, 255, 255, 0.45);
+   color: var(--text-muted);
    font-style: italic;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+   border-bottom: 1px solid var(--bg-border);
 }
 
 /* --- Article Content Body --- */
 .articleContent {
    line-height: 1.8;
-   color: rgba(255, 255, 255, 0.85);
+   color: var(--text-primary);
    transition: font-size 0.2s ease;
 }
 
@@ -278,7 +284,7 @@
    font-size: 1.05rem;
    font-style: italic;
    line-height: 1.6;
-   color: rgba(255, 255, 255, 0.9);
+   color: var(--text-primary);
    margin-bottom: 0.6rem;
 }
 
@@ -295,13 +301,18 @@
    display: flex;
    flex-direction: column;
    gap: 1.8rem;
+   position: sticky;
+   top: 100px;
 }
 
 .sidebarBlock {
-   background: #141414;
-   border: 1px solid rgba(255, 255, 255, 0.04);
-   border-radius: 6px;
-   padding: 1.2rem;
+   background: var(--glass-bg);
+   border: 1px solid var(--glass-border);
+   border-radius: 16px;
+   padding: 1.5rem;
+   box-shadow: var(--shadow-md);
+   backdrop-filter: var(--glass-blur);
+   -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .sidebarHead {
@@ -309,7 +320,7 @@
    align-items: center;
    gap: 0.4rem;
    margin-bottom: 1rem;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+   border-bottom: 1px solid var(--bg-border);
    padding-bottom: 0.5rem;
 }
 
@@ -330,6 +341,29 @@
    display: flex;
    flex-direction: column;
    gap: 1rem;
+   max-height: 400px;
+   overflow-y: auto;
+   padding-right: 8px;
+}
+
+/* Custom Scrollbar for Sidebar Lists */
+.relatedList::-webkit-scrollbar,
+.mostReadList::-webkit-scrollbar {
+   width: 4px;
+}
+.relatedList::-webkit-scrollbar-track,
+.mostReadList::-webkit-scrollbar-track {
+   background: var(--bg-border);
+   border-radius: 4px;
+}
+.relatedList::-webkit-scrollbar-thumb,
+.mostReadList::-webkit-scrollbar-thumb {
+   background: var(--gold-dark);
+   border-radius: 4px;
+}
+.relatedList::-webkit-scrollbar-thumb:hover,
+.mostReadList::-webkit-scrollbar-thumb:hover {
+   background: var(--gold-primary);
 }
 
 .relatedItem {
@@ -349,7 +383,7 @@
    border-radius: 3px;
    overflow: hidden;
    flex-shrink: 0;
-   background: #222;
+   background: var(--bg-secondary);
 }
 
 .relatedImg {
@@ -368,7 +402,7 @@
 .relatedTitleText {
    font-size: 0.8rem;
    font-weight: 600;
-   color: rgba(255, 255, 255, 0.9);
+   color: var(--text-primary);
    line-height: 1.35;
    margin: 0;
    display: -webkit-box;
@@ -383,7 +417,7 @@
 
 .relatedTime {
    font-size: 0.7rem;
-   color: rgba(255, 255, 255, 0.4);
+   color: var(--text-muted);
    display: flex;
    align-items: center;
    gap: 0.25rem;
@@ -404,7 +438,7 @@
 .tagItem {
    font-size: 0.72rem;
    text-decoration: none;
-   color: rgba(255, 255, 255, 0.55);
+   color: var(--text-muted);
    border: 1px solid rgba(221, 180, 107, 0.2);
    padding: 0.35rem 0.65rem;
    border-radius: 12px;
@@ -422,7 +456,10 @@
 .mostReadList {
    display: flex;
    flex-direction: column;
-   gap: 0.9rem;
+   gap: 1.2rem;
+   max-height: 400px;
+   overflow-y: auto;
+   padding-right: 8px;
 }
 
 .mostReadItem {
@@ -448,7 +485,7 @@
 .mostReadTitleText {
    font-size: 0.8rem;
    font-weight: 600;
-   color: rgba(255, 255, 255, 0.85);
+   color: var(--text-primary);
    line-height: 1.35;
    margin: 0;
    transition: color 0.2s ease;
@@ -465,7 +502,7 @@
    left: 50%;
    transform: translateX(-50%);
    background: rgb(221, 180, 107);
-   color: #0E0E0E;
+   color: var(--bg-primary);
    padding: 0.7rem 1.4rem;
    border-radius: 3px;
    font-weight: 600;
@@ -497,7 +534,7 @@
 /* --- Comments Section Styles --- */
 .commentsSection {
    margin-top: 3.5rem;
-   border-top: 1px solid rgba(255, 255, 255, 0.1);
+   border-top: 1px solid var(--bg-border);
    padding-top: 2rem;
 }
 
@@ -524,8 +561,8 @@
 .commentInputBox {
    display: flex;
    gap: 1rem;
-   background: #141414;
-   border: 1px solid rgba(255, 255, 255, 0.05);
+   background: var(--bg-card);
+   border: 1px solid var(--bg-border);
    border-radius: 6px;
    padding: 1.2rem;
    margin-bottom: 2rem;
@@ -539,14 +576,14 @@
    width: 40px;
    height: 40px;
    border-radius: 50%;
-   background: #282828;
-   color: rgba(255, 255, 255, 0.6);
+   background: var(--bg-secondary);
+   color: var(--text-secondary);
    display: flex;
    align-items: center;
    justify-content: center;
    font-weight: 700;
    font-size: 1.1rem;
-   border: 1px solid rgba(255, 255, 255, 0.08);
+   border: 1px solid var(--bg-border);
    text-transform: uppercase;
 }
 
@@ -564,10 +601,10 @@
 }
 
 .commentTextarea {
-   background: #1e1e1e;
-   border: 1px solid rgba(255, 255, 255, 0.1);
+   background: var(--bg-secondary);
+   border: 1px solid var(--bg-border);
    border-radius: 4px;
-   color: #FFF;
+   color: var(--text-primary);
    padding: 0.8rem;
    font-family: inherit;
    font-size: 0.9rem;
@@ -617,12 +654,12 @@
 
 .charCounter {
    font-size: 0.75rem;
-   color: rgba(255, 255, 255, 0.4);
+   color: var(--text-muted);
 }
 
 .btnSubmitComment {
    background: rgb(221, 180, 107);
-   color: #0E0E0E;
+   color: var(--bg-primary);
    border: none;
    border-radius: 4px;
    padding: 0.5rem 1.2rem;
@@ -637,8 +674,8 @@
 }
 
 .btnSubmitComment:disabled {
-   background: #282828;
-   color: rgba(255, 255, 255, 0.3);
+   background: var(--bg-secondary);
+   color: var(--text-muted);
    cursor: not-allowed;
 }
 
@@ -646,14 +683,14 @@
 .commentTabs {
    display: flex;
    gap: 1.5rem;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+   border-bottom: 1px solid var(--bg-border);
    margin-bottom: 1.5rem;
 }
 
 .tabBtn {
    background: transparent;
    border: none;
-   color: rgba(255, 255, 255, 0.5);
+   color: var(--text-muted);
    font-size: 0.8rem;
    font-weight: 700;
    padding: 0.6rem 0;
@@ -664,7 +701,7 @@
 }
 
 .tabBtn:hover {
-   color: rgba(255, 255, 255, 0.85);
+   color: var(--text-primary);
 }
 
 .tabBtnActive {
@@ -689,7 +726,7 @@
 }
 
 .commentItem {
-   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+   border-bottom: 1px solid var(--bg-border);
    padding-bottom: 1.2rem;
 }
 
@@ -733,19 +770,19 @@
 .commentAuthorName {
    font-size: 0.85rem;
    font-weight: 600;
-   color: rgba(255, 255, 255, 0.95);
+   color: var(--text-primary);
 }
 
 .commentTime {
    font-size: 0.75rem;
-   color: rgba(255, 255, 255, 0.4);
+   color: var(--text-muted);
 }
 
 .commentOptionsBtn {
    margin-left: auto;
    background: transparent;
    border: none;
-   color: rgba(255, 255, 255, 0.35);
+   color: var(--text-muted);
    font-size: 0.75rem;
    cursor: pointer;
    padding: 0.3rem;
@@ -753,13 +790,13 @@
 }
 
 .commentOptionsBtn:hover {
-   color: rgba(255, 255, 255, 0.85);
+   color: var(--text-primary);
 }
 
 .commentTextContent {
    font-size: 0.9rem;
    line-height: 1.5;
-   color: rgba(255, 255, 255, 0.8);
+   color: var(--text-primary);
    margin: 0 0 0.8rem 0;
    padding-left: 2.5rem;
    text-align: justify;
@@ -778,7 +815,7 @@
    gap: 0.3rem;
    background: transparent;
    border: none;
-   color: rgba(255, 255, 255, 0.45);
+   color: var(--text-muted);
    font-size: 0.75rem;
    cursor: pointer;
    transition: color 0.2s ease;
@@ -796,7 +833,7 @@
 .actionTextBtn {
    background: transparent;
    border: none;
-   color: rgba(255, 255, 255, 0.45);
+   color: var(--text-muted);
    font-size: 0.75rem;
    font-weight: 600;
    cursor: pointer;
@@ -820,17 +857,17 @@
 .repliesList {
    margin-top: 1rem;
    padding-left: 2.5rem;
-   border-left: 1.5px solid rgba(255, 255, 255, 0.05);
+   border-left: 1.5px solid var(--bg-border);
    display: flex;
    flex-direction: column;
    gap: 1rem;
 }
 
 .replyItem {
-   background: rgba(255, 255, 255, 0.01);
+   background: var(--bg-border);
    border-radius: 4px;
    padding: 0.6rem 0.8rem;
-   border: 1px solid rgba(255, 255, 255, 0.02);
+   border: 1px solid var(--bg-border);
 }
 
 .replyItem .commentTextContent {
@@ -954,6 +991,11 @@
 }
 
 @media (max-width: 768px) {
+   .mainColumn {
+      padding: 1.25rem;
+      border-radius: 12px;
+   }
+
    .title {
       font-size: 1.8rem;
    }
@@ -1012,4 +1054,22 @@
    .repliesList {
       padding-left: 0 !important;
    }
+}
+
+.bookmarked {
+   color: rgb(221, 180, 107) !important;
+   border-color: rgb(221, 180, 107) !important;
+   background: rgba(221, 180, 107, 0.1) !important;
+}
+
+.liked {
+   color: #E53E3E !important;
+   border-color: #E53E3E !important;
+   background: rgba(229, 62, 62, 0.1) !important;
+}
+
+.likeCount {
+   font-size: 0.7rem;
+   font-weight: 700;
+   margin-left: 0.2rem;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { articlesAPI } from '../../utils/api';
+import { motion } from 'framer-motion';
+import { articlesAPI, recommendationAPI, tokenStorage } from '../../utils/api';
 import { CATEGORY_MAP } from '../../constant/global';
 import styles from './HomePage.module.css';
 
@@ -42,16 +43,127 @@ function TimeAgo({ date }) {
    );
 }
 
+// ---- Reusable Category Section with Featured + List layout ----
+function CategorySection({ title, icon, slug, articles, accentColor }) {
+   if (!articles || articles.length === 0) return null;
+   const featured = articles[0];
+   const list = articles.slice(1, 5);
+
+   return (
+      <div className={styles.categorySection} style={{ '--section-accent': accentColor }}>
+         <div className={styles.sectionHead}>
+            <div className={styles.sectionHeadLeft}>
+               <span className={styles.sectionIcon}>{icon}</span>
+               <h2 className={styles.sectionName}>{title}</h2>
+            </div>
+            <Link to={`/category/${slug}`} className={styles.viewAll} id={`btn-view-all-${slug}`}>
+               Xem tất cả →
+            </Link>
+         </div>
+         <div className={styles.catSectionBody}>
+            {/* Featured big card */}
+            <Link to={`/article/${featured.id}`} className={styles.catFeatured} id={`${slug}-featured`}>
+               <img
+                  src={featured.image || 'https://via.placeholder.com/600x400?text=No+Image'}
+                  alt={featured.title}
+                  className={styles.catFeaturedImg}
+                  loading="lazy"
+               />
+               <div className={styles.catFeaturedOverlay}>
+                  <h3 className={styles.catFeaturedTitle}>{featured.title}</h3>
+                  <p className={styles.catFeaturedExcerpt}>{featured.excerpt}</p>
+                  <TimeAgo date={featured.publishedAt || featured.createdAt} />
+               </div>
+            </Link>
+            {/* List of small articles */}
+            {list.length > 0 && (
+               <div className={styles.catList}>
+                  {list.map((article) => (
+                     <Link key={article.id} to={`/article/${article.id}`} className={styles.catListItem}>
+                        <img
+                           src={article.image || 'https://via.placeholder.com/150x100?text=No+Image'}
+                           alt={article.title}
+                           className={styles.catListImg}
+                           loading="lazy"
+                        />
+                        <div className={styles.catListContent}>
+                           <h4 className={styles.catListTitle}>{article.title}</h4>
+                           <TimeAgo date={article.publishedAt || article.createdAt} />
+                        </div>
+                     </Link>
+                  ))}
+               </div>
+            )}
+         </div>
+      </div>
+   );
+}
+
+// ---- Horizontal article strip for a category ----
+function HorizontalSection({ title, icon, slug, articles, accentColor }) {
+   if (!articles || articles.length === 0) return null;
+
+   return (
+      <div className={styles.horizSection}>
+         <div className={styles.sectionHead}>
+            <div className={styles.sectionHeadLeft}>
+               <span className={styles.sectionIcon}>{icon}</span>
+               <h2 className={styles.sectionName}>{title}</h2>
+            </div>
+            <Link to={`/category/${slug}`} className={styles.viewAll} id={`btn-view-all-${slug}`}>
+               Xem tất cả →
+            </Link>
+         </div>
+         <div className={styles.horizGrid}>
+            {articles.slice(0, 8).map((article) => (
+               <Link key={article.id} to={`/article/${article.id}`} className={styles.horizCard}>
+                  <div className={styles.horizImgWrap}>
+                     <img
+                        src={article.image || 'https://via.placeholder.com/400x250?text=No+Image'}
+                        alt={article.title}
+                        className={styles.horizImg}
+                        loading="lazy"
+                     />
+                     <CatBadge categoryId={article.category} small />
+                  </div>
+                  <div className={styles.horizContent}>
+                     <h3 className={styles.horizTitle}>{article.title}</h3>
+                     <p className={styles.horizExcerpt}>{article.excerpt}</p>
+                     <TimeAgo date={article.publishedAt || article.createdAt} />
+                  </div>
+               </Link>
+            ))}
+         </div>
+      </div>
+   );
+}
+
 function HomePage() {
    const [articles, setArticles] = useState([]);
+   const [recommendations, setRecommendations] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
+   const loggedInUser = tokenStorage.getUser();
 
    useEffect(() => {
       const fetchArticles = async () => {
          try {
-            const data = await articlesAPI.getAll(20, 0);
+            const data = await articlesAPI.getAll(60, 0);
             setArticles(data);
+
+            // Fetch personalized recommendations or popular
+            try {
+               if (loggedInUser) {
+                  const recs = await recommendationAPI.getRecommendations(8);
+                  setRecommendations(recs);
+               } else {
+                  const popular = await recommendationAPI.getPopular(8);
+                  setRecommendations(popular);
+               }
+            } catch (recErr) {
+               console.error('Recommendations error:', recErr);
+            }
+
             setLoading(false);
          } catch (err) {
             console.error('Error fetching articles:', err);
@@ -92,17 +204,28 @@ function HomePage() {
    // Data slices from real API data
    const heroArticle = articles[0];
    const midArticles = articles.slice(1, 5);
-   const latestNews = articles.slice(0, 5);
-   const thoisuArticles = articles.filter((a) => a.category === 'thoisu').slice(0, 4);
-   
-   // We don't have techFeatured in DB, so we just pick the first technology article as featured if available
-   const techArticles = articles.filter((a) => a.category === 'technology');
-   const techFeatured = techArticles.length > 0 ? techArticles[0] : null;
-   const techSmall = techFeatured ? techArticles.slice(1, 3) : techArticles.slice(0, 2);
+   const latestNews = articles.slice(0, 8);
+
+   // Category filters
+   const byCat = (cat) => articles.filter((a) => a.category === cat);
+   const thoisuArticles = byCat('thoisu');
+   const techArticles = byCat('technology');
+   const sportsArticles = byCat('sports');
+   const entertainmentArticles = byCat('entertainment');
+   const businessArticles = byCat('business');
+   const theGioiArticles = byCat('thegioi');
+   const healthArticles = byCat('health');
+   const educationArticles = byCat('education');
+   const travelArticles = byCat('travel');
 
    return (
-      <div className={styles.homePage}>
-         {/* ========== HERO SECTION ========== */}
+      <motion.div 
+         className={styles.homeWrap}
+         initial={{ opacity: 0 }}
+         animate={{ opacity: 1 }}
+         transition={{ duration: 0.6 }}
+      >
+         {/* ========== HERO SECTION (LATEST NEWS) ========== */}
          <section className={styles.heroSection} aria-label="Tin nổi bật">
             <div className={styles.container}>
                <div className={styles.heroGrid}>
@@ -173,9 +296,6 @@ function HomePage() {
                            </Link>
                         ))}
                      </div>
-                     <Link to="/latest" className={styles.viewAllBtn} id="btn-view-all-latest">
-                        Xem tất cả <span>→</span>
-                     </Link>
                   </aside>
                </div>
             </div>
@@ -184,109 +304,183 @@ function HomePage() {
          {/* ========== DIVIDER ========== */}
          <div className={styles.divider} />
 
-         {/* ========== MAIN CONTENT SECTIONS ========== */}
-         <section className={styles.mainSections} aria-label="Tin tức theo chuyên mục">
-            <div className={styles.container}>
-               <div className={styles.sectionsGrid}>
-                  {/* --- THỜI SỰ --- */}
-                  <div className={styles.thoisuSection}>
+         {/* ========== ĐỀ XUẤT CHO BẠN (AI Recommendations) ========== */}
+         {recommendations.length > 0 && (
+            <motion.section 
+               className={styles.mainSections} aria-label="Đề xuất cho bạn"
+               initial={{ opacity: 0, y: 20 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               viewport={{ once: true, margin: "-50px" }}
+               transition={{ duration: 0.5 }}
+            >
+               <div className={styles.container}>
+                  <div className={styles.recSection}>
                      <div className={styles.sectionHead}>
                         <div className={styles.sectionHeadLeft}>
-                           <span className={styles.sectionIcon}>📰</span>
-                           <h2 className={styles.sectionName}>THỜI SỰ</h2>
+                           <span className={styles.sectionIcon}>✨</span>
+                           <h2 className={styles.sectionName}>
+                              {loggedInUser ? 'ĐỀ XUẤT CHO BẠN' : 'ĐANG THỊNH HÀNH'}
+                           </h2>
+                           {loggedInUser && (
+                              <span className={styles.aiBadge}>AI</span>
+                           )}
                         </div>
-                        <Link to="/category/thoisu" className={styles.viewAll} id="btn-view-all-thoisu">
-                           Xem tất cả →
-                        </Link>
                      </div>
-                     <div className={styles.thoisuList}>
-                        {thoisuArticles.map((article) => (
-                           <Link
-                              key={article.id}
-                              to={`/article/${article.id}`}
-                              className={styles.thoisuItem}
-                              id={`thoisu-${article.id}`}
-                           >
-                              <img
-                                 src={article.image || 'https://via.placeholder.com/400x300?text=No+Image'}
-                                 alt={article.title}
-                                 className={styles.thoisuImg}
-                                 loading="lazy"
-                              />
-                              <div className={styles.thoisuContent}>
-                                 <h3 className={styles.thoisuTitle}>{article.title}</h3>
-                                 <p className={styles.thoisuExcerpt}>{article.excerpt}</p>
-                                 <div className={styles.thoisuMeta}>
-                                    <TimeAgo date={article.publishedAt || article.createdAt} />
-                                    <CatBadge categoryId={article.category} small />
-                                 </div>
+                     <div className={styles.recGrid}>
+                        {recommendations.slice(0, 8).map((article) => (
+                           <Link key={article.id} to={`/article/${article.id}`} className={styles.recCard}>
+                              <div className={styles.recImgWrap}>
+                                 <img
+                                    src={article.image || 'https://via.placeholder.com/400x250?text=No+Image'}
+                                    alt={article.title}
+                                    className={styles.recImg}
+                                    loading="lazy"
+                                 />
+                                 <CatBadge categoryId={article.category} small />
                               </div>
-                           </Link>
-                        ))}
-                        {thoisuArticles.length === 0 && (
-                           <p style={{ color: '#888' }}>Chưa có bài viết Thời sự nào.</p>
-                        )}
-                     </div>
-                  </div>
-
-                  {/* --- CÔNG NGHỆ --- */}
-                  <div className={styles.congngheSection}>
-                     <div className={styles.sectionHead}>
-                        <div className={styles.sectionHeadLeft}>
-                           <span className={styles.sectionIcon}>💻</span>
-                           <h2 className={styles.sectionName}>CÔNG NGHỆ</h2>
-                        </div>
-                        <Link to="/category/technology" className={styles.viewAll} id="btn-view-all-congnghe">
-                           Xem tất cả →
-                        </Link>
-                     </div>
-                     {/* Big Tech Card */}
-                     {techFeatured ? (
-                        <Link
-                           to={`/article/${techFeatured.id}`}
-                           className={styles.techBig}
-                           id="tech-featured"
-                        >
-                           <img
-                              src={techFeatured.image || 'https://via.placeholder.com/600x400?text=No+Image'}
-                              alt={techFeatured.title}
-                              className={styles.techBigImg}
-                              loading="lazy"
-                           />
-                           <div className={styles.techBigOverlay}>
-                              <h3 className={styles.techBigTitle}>{techFeatured.title}</h3>
-                              <TimeAgo date={techFeatured.publishedAt || techFeatured.createdAt} />
-                           </div>
-                        </Link>
-                     ) : (
-                        <p style={{ color: '#888', marginBottom: '1rem' }}>Chưa có bài viết Công nghệ nào.</p>
-                     )}
-                     {/* Small Tech Cards */}
-                     <div className={styles.techSmallList}>
-                        {techSmall.map((article) => (
-                           <Link
-                              key={article.id}
-                              to={`/article/${article.id}`}
-                              className={styles.techSmallItem}
-                              id={`tech-${article.id}`}
-                           >
-                              <img
-                                 src={article.image || 'https://via.placeholder.com/150x150?text=No+Image'}
-                                 alt={article.title}
-                                 className={styles.techSmallImg}
-                                 loading="lazy"
-                              />
-                              <div className={styles.techSmallContent}>
-                                 <h4 className={styles.techSmallTitle}>{article.title}</h4>
-                                 <TimeAgo date={article.publishedAt || article.createdAt} />
+                              <div className={styles.recContent}>
+                                 <h3 className={styles.recTitle}>{article.title}</h3>
+                                 <p className={styles.recExcerpt}>{article.excerpt}</p>
+                                 <div className={styles.recMeta}>
+                                    <TimeAgo date={article.publishedAt || article.createdAt} />
+                                    {article.views > 0 && (
+                                       <span className={styles.recViews}>👁 {article.views}</span>
+                                    )}
+                                 </div>
                               </div>
                            </Link>
                         ))}
                      </div>
                   </div>
                </div>
+            </motion.section>
+         )}
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 1: THỜI SỰ + CÔNG NGHỆ ========== */}
+         <motion.section 
+            className={styles.mainSections} aria-label="Tin tức theo chuyên mục"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <div className={styles.sectionsGrid}>
+                  <CategorySection
+                     title="THỜI SỰ" icon="📰" slug="thoisu"
+                     articles={thoisuArticles} accentColor="#E53E3E"
+                  />
+                  <CategorySection
+                     title="CÔNG NGHỆ" icon="💻" slug="technology"
+                     articles={techArticles} accentColor="#4299E1"
+                  />
+               </div>
             </div>
-         </section>
+         </motion.section>
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 2: KINH DOANH (full width horizontal) ========== */}
+         <motion.section 
+            className={styles.mainSections}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <HorizontalSection
+                  title="KINH DOANH" icon="💰" slug="business"
+                  articles={businessArticles} accentColor="#D4AF37"
+               />
+            </div>
+         </motion.section>
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 3: THỂ THAO + GIẢI TRÍ ========== */}
+         <motion.section 
+            className={styles.mainSections}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <div className={styles.sectionsGrid}>
+                  <CategorySection
+                     title="THỂ THAO" icon="⚽" slug="sports"
+                     articles={sportsArticles} accentColor="#38A169"
+                  />
+                  <CategorySection
+                     title="GIẢI TRÍ" icon="🎬" slug="entertainment"
+                     articles={entertainmentArticles} accentColor="#805AD5"
+                  />
+               </div>
+            </div>
+         </motion.section>
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 4: THẾ GIỚI (full width horizontal) ========== */}
+         <motion.section 
+            className={styles.mainSections}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <HorizontalSection
+                  title="THẾ GIỚI" icon="🌍" slug="thegioi"
+                  articles={theGioiArticles} accentColor="#3182CE"
+               />
+            </div>
+         </motion.section>
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 5: SỨC KHỎE + GIÁO DỤC ========== */}
+         <motion.section 
+            className={styles.mainSections}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <div className={styles.sectionsGrid}>
+                  <CategorySection
+                     title="SỨC KHỎE" icon="🏥" slug="health"
+                     articles={healthArticles} accentColor="#DD6B20"
+                  />
+                  <CategorySection
+                     title="GIÁO DỤC" icon="📚" slug="education"
+                     articles={educationArticles} accentColor="#B7791F"
+                  />
+               </div>
+            </div>
+         </motion.section>
+
+         <div className={styles.divider} />
+
+         {/* ========== ROW 6: DU LỊCH (full width horizontal) ========== */}
+         <motion.section 
+            className={styles.mainSections}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+         >
+            <div className={styles.container}>
+               <HorizontalSection
+                  title="DU LỊCH" icon="✈️" slug="travel"
+                  articles={travelArticles} accentColor="#2C7A7B"
+               />
+            </div>
+         </motion.section>
 
          {/* ========== VALUES STRIP ========== */}
          <footer className={styles.valuesStrip} aria-label="Giá trị cốt lõi">
@@ -309,9 +503,8 @@ function HomePage() {
                </div>
             </div>
          </footer>
-      </div>
+      </motion.div>
    );
 }
 
 export default HomePage;
-

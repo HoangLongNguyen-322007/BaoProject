@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { articlesAPI, commentsAPI, tokenStorage } from '../../utils/api';
+import { motion } from 'framer-motion';
+import { articlesAPI, commentsAPI, bookmarksAPI, recommendationAPI, tokenStorage } from '../../utils/api';
 import { CATEGORY_MAP } from '../../constant/global';
 import styles from './ArticleDetailPage.module.css';
 
@@ -31,6 +32,12 @@ function ArticleDetailPage() {
    const [comments, setComments] = useState([]);
    const [newCommentText, setNewCommentText] = useState('');
    const [activeTab, setActiveTab] = useState('newest'); // 'newest' | 'popular'
+   const [isBookmarked, setIsBookmarked] = useState(false);
+   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+   const [isLiked, setIsLiked] = useState(false);
+   const [likeCount, setLikeCount] = useState(0);
+   const [likeLoading, setLikeLoading] = useState(false);
+   const [recommendations, setRecommendations] = useState([]);
 
    useEffect(() => {
       const fetchData = async () => {
@@ -40,8 +47,22 @@ function ArticleDetailPage() {
             // Fetch main article
             const articleData = await articlesAPI.getById(id);
             setArticle(articleData);
+            setLikeCount(articleData.likes || 0);
             
-            // Fetch related and most read (using getAll for simplicity in this demo)
+            // Track reading + get recommendations (if logged in)
+            if (loggedInUser) {
+               try {
+                  await recommendationAPI.trackRead(id, articleData.category);
+                  const likeStatus = await recommendationAPI.getLikeStatus(id);
+                  setIsLiked(likeStatus.liked);
+                  const recs = await recommendationAPI.getRecommendations(8);
+                  setRecommendations(recs.filter(r => r.id !== id));
+               } catch (recErr) {
+                  console.error('Recommendation tracking error:', recErr);
+               }
+            }
+            
+            // Fetch related and most read
             const allArticles = await articlesAPI.getAll(20, 0);
             
             // Related: same category, different ID
@@ -57,6 +78,16 @@ function ArticleDetailPage() {
             const commentsData = await commentsAPI.getByArticle(id);
             setComments(commentsData);
 
+            // Fetch bookmark status
+            if (loggedInUser) {
+               try {
+                  const bookmarks = await bookmarksAPI.getAll();
+                  setIsBookmarked(bookmarks.some(b => String(b.id) === String(id)));
+               } catch (bookmarkErr) {
+                  console.error('Failed to fetch bookmark status:', bookmarkErr);
+               }
+            }
+
          } catch (err) {
             console.error(err);
             setError('Không thể tải bài viết. Bài viết có thể không tồn tại hoặc đã bị xóa.');
@@ -69,6 +100,52 @@ function ArticleDetailPage() {
       window.scrollTo(0, 0);
    }, [id]);
 
+   const handleToggleBookmark = async () => {
+      if (!loggedInUser) {
+         alert('Vui lòng đăng nhập để lưu bài viết!');
+         return;
+      }
+      setBookmarkLoading(true);
+      try {
+         if (isBookmarked) {
+            await bookmarksAPI.delete(id);
+            setIsBookmarked(false);
+         } else {
+            await bookmarksAPI.add(id);
+            setIsBookmarked(true);
+         }
+      } catch (err) {
+         console.error(err);
+         alert('Lỗi khi cập nhật trạng thái lưu bài viết: ' + err.message);
+      } finally {
+         setBookmarkLoading(false);
+      }
+   };
+
+   const handleToggleLike = async () => {
+      if (!loggedInUser) {
+         alert('Vui lòng đăng nhập để thích bài viết!');
+         return;
+      }
+      if (!article) return;
+      setLikeLoading(true);
+      try {
+         if (isLiked) {
+            await recommendationAPI.unlike(id);
+            setIsLiked(false);
+            setLikeCount(prev => Math.max(0, prev - 1));
+         } else {
+            await recommendationAPI.like(id, article.category);
+            setIsLiked(true);
+            setLikeCount(prev => prev + 1);
+         }
+      } catch (err) {
+         console.error(err);
+      } finally {
+         setLikeLoading(false);
+      }
+   };
+
    const handleCommentSubmit = async (e) => {
       e.preventDefault();
       if (!newCommentText.trim() || !loggedInUser) return;
@@ -79,7 +156,7 @@ function ArticleDetailPage() {
          const commentsData = await commentsAPI.getByArticle(id);
          setComments(commentsData);
          setNewCommentText('');
-         alert('Bình luận đã được gửi và đang chờ duyệt.');
+         alert('Đăng bình luận thành công!');
       } catch (err) {
          alert('Lỗi: ' + err.message);
       }
@@ -199,7 +276,12 @@ function ArticleDetailPage() {
    };
 
    return (
-      <div className={styles.articlePage}>
+      <motion.div 
+         className={styles.articlePage}
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.5, ease: "easeOut" }}
+      >
          {/* Toast Notification for copying link */}
          {copied && <div className={styles.toast}>Đã sao chép liên kết thành công!</div>}
 
@@ -293,6 +375,33 @@ function ArticleDetailPage() {
                               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                            </svg>
                         </button>
+                        {/* Like button */}
+                        <button
+                           className={`${styles.toolBtn} ${isLiked ? styles.liked : ''}`}
+                           onClick={handleToggleLike}
+                           disabled={likeLoading}
+                           aria-label={isLiked ? 'Bỏ thích' : 'Thích bài viết'}
+                           title={isLiked ? 'Bỏ thích' : 'Thích bài viết'}
+                        >
+                           <svg width="16" height="16" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                           </svg>
+                           {likeCount > 0 && <span className={styles.likeCount}>{likeCount}</span>}
+                        </button>
+                        {/* Bookmark button */}
+                        {loggedInUser && (
+                           <button
+                              className={`${styles.toolBtn} ${isBookmarked ? styles.bookmarked : ''}`}
+                              onClick={handleToggleBookmark}
+                              disabled={bookmarkLoading}
+                              aria-label={isBookmarked ? "Bỏ lưu bài viết" : "Lưu bài viết"}
+                              title={isBookmarked ? "Bỏ lưu bài viết" : "Lưu bài viết"}
+                           >
+                              <svg width="16" height="16" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                              </svg>
+                           </button>
+                        )}
                      </div>
 
                      <div className={styles.textAdjust}>
@@ -542,7 +651,7 @@ function ArticleDetailPage() {
                </aside>
             </div>
          </div>
-      </div>
+      </motion.div>
    );
 }
 

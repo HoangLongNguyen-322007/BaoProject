@@ -12,6 +12,8 @@
       "cors": "^2.8.6",
       "dotenv": "^17.4.2",
       "express": "^5.2.1",
+      "framer-motion": "^12.40.0",
+      "image-size": "^2.0.2",
       "jsonwebtoken": "^9.0.3",
       "morgan": "^1.11.0",
       "pg": "^8.21.0",
@@ -25,10 +27,15 @@
    "scripts": {
       "dev": "concurrently 'npm run dev:server' 'npm run dev:client'",
       "dev:client": "vite --host",
-      "dev:server": "node src/server/app.js",
+      "dev:server": "node --watch src/server/app.js",
       "build": "vite build",
       "test": "react-scripts test",
-      "eject": "react-scripts eject"
+      "eject": "react-scripts eject",
+      "db:migrate": "node src/backend/database/migrate.js",
+      "db:seed": "node src/backend/config/seed.js",
+      "db:reset": "node src/backend/database/reset.js --confirm",
+      "db:setup": "node src/backend/database/setup.js",
+      "db:reset-full": "npm run db:reset && npm run db:setup"
    },
    "eslintConfig": {
       "extends": [
@@ -49,11 +56,15 @@
       ]
    },
    "devDependencies": {
+      "@types/matter-js": "^0.20.2",
+      "@types/react": "^19.2.17",
+      "@types/react-dom": "^19.2.3",
       "@vitejs/plugin-react": "^6.0.2",
       "concurrently": "^10.0.0",
       "husky": "^9.1.7",
       "lint-staged": "^17.0.7",
       "prettier": "^3.8.3",
+      "typescript": "^4.9.5",
       "vite": "^8.0.14"
    },
    "lint-staged": {

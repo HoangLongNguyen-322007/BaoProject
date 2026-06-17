@@ -36,7 +36,7 @@ function LoginPage() {
             {/* Logo */}
             <div className={styles.logoWrap}>
                <img
-                  src="/rongvang-logo.png"
+                  src="/logo512.png"
                   alt="Rồng Vàng logo"
                   className={styles.logoImg}
                />

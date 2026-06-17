@@ -9,30 +9,19 @@ function CategoryPage() {
    const { category } = useParams();
    const [articles, setArticles] = useState([]);
    const [loading, setLoading] = useState(true);
-
-   // Map slug from URL to category ID if needed, or use directly
-   // Assuming backend expects category ID or slug
-   // Actually, the route in backend is /api/articles?category=...
-   // We will pass the category parameter.
+   const [error, setError] = useState(null);
    
    useEffect(() => {
       const fetchArticles = async () => {
          setLoading(true);
+         setError(null);
          try {
-            // Wait for 100ms just to show loading state nicely
-            // Then fetch from backend
-            let categoryFilter = category;
-            
-            // if we need to map slug to ID
-            const foundCategory = CATEGORIES.find(c => c.slug === category);
-            if (foundCategory) {
-               categoryFilter = foundCategory.id;
-            }
-
-            const data = await articlesAPI.getAll(50, 0, categoryFilter);
-            setArticles(data);
+            // Pass the category slug directly to the API
+            const data = await articlesAPI.getByCategory(category, 50, 0);
+            setArticles(Array.isArray(data) ? data : []);
          } catch (err) {
             console.error('Failed to fetch category articles:', err);
+            setError('Không thể tải bài viết. Vui lòng thử lại sau.');
          } finally {
             setLoading(false);
          }
@@ -42,19 +31,53 @@ function CategoryPage() {
       window.scrollTo(0, 0);
    }, [category]);
 
-   // find the display name
-   const displayCategory = CATEGORIES.find(c => c.slug === category) || CATEGORY_MAP[category] || { name: category };
-   const title = `${displayCategory.name}`;
+   // find the display name from CATEGORY_MAP or CATEGORIES
+   const displayCategory = CATEGORY_MAP[category] || CATEGORIES.find(c => c.slug === category) || { name: category };
+   const title = displayCategory.name;
 
-   const featuredArticles = articles.slice(0, 2); // just take first 2 as featured for now
+   const featuredArticles = articles.slice(0, 2);
    const otherArticles = articles.slice(2);
 
    if (loading) {
       return (
-         <div className={styles.homePage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+         <div className={styles.categoryPage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
             <div className="loading-spinner" style={{ fontSize: '1.5rem', color: 'var(--gold-primary)' }}>
                Đang tải bài viết...
             </div>
+         </div>
+      );
+   }
+
+   if (error) {
+      return (
+         <div className={styles.categoryPage} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+            <div style={{ textAlign: 'center', color: '#ff4757' }}>
+               <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>{error}</p>
+               <button
+                  onClick={() => window.location.reload()}
+                  style={{ padding: '0.5rem 1.5rem', background: 'var(--gold-primary)', color: '#0E0E0E', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+               >
+                  Thử lại
+               </button>
+            </div>
+         </div>
+      );
+   }
+
+   if (articles.length === 0) {
+      return (
+         <div className={styles.categoryPage}>
+            <section className={styles.articles}>
+               <h2 className={styles.sectionTitle}>{title}</h2>
+               <p style={{ textAlign: 'center', color: '#888', marginTop: '3rem', fontSize: '1.1rem' }}>
+                  Chưa có bài viết nào trong chuyên mục này.
+               </p>
+               <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                  <Link to="/" style={{ color: 'var(--gold-primary)', textDecoration: 'underline' }}>
+                     ← Quay lại Trang chủ
+                  </Link>
+               </div>
+            </section>
          </div>
       );
    }
@@ -82,18 +105,17 @@ function CategoryPage() {
          )}
 
          {/* Articles Section */}
-         <section className={styles.articles} aria-labelledby="articles-heading">
-            <h2 id="articles-heading" className={styles.sectionTitle}>
-               Mới nhất - {title}
-            </h2>
-            {otherArticles.length > 0 ? (
+         {otherArticles.length > 0 && (
+            <section className={styles.articles} aria-labelledby="articles-heading">
+               <h2 id="articles-heading" className={styles.sectionTitle}>
+                  Mới nhất - {title}
+               </h2>
                <ArticleGrid articles={otherArticles} />
-            ) : (
-               <p style={{ textAlign: 'center', color: '#888', marginTop: '2rem' }}>Chưa có bài viết nào trong chuyên mục này.</p>
-            )}
-         </section>
+            </section>
+         )}
       </div>
    );
 }
 
 export default CategoryPage;
+

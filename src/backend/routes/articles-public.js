@@ -16,6 +16,16 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
+// Get search suggestions (public)
+router.get('/search/suggestions/:query', async (req, res) => {
+  try {
+    const suggestions = await articleRepository.getSuggestions(req.params.query);
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch suggestions', error: error.message });
+  }
+});
+
 // Search articles (public)
 router.get('/search/:query', async (req, res) => {
   try {

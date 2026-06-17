@@ -7,17 +7,130 @@
    box-sizing: border-box;
 }
 
-html {
-   scroll-behavior: smooth;
+/* ============================================
+   SMOOTH THEME TRANSITION
+   Applied briefly during theme switch so all
+   color/background properties animate smoothly
+   ============================================ */
+body.theme-transitioning,
+body.theme-transitioning *,
+body.theme-transitioning *::before,
+body.theme-transitioning *::after {
+   transition:
+      background-color 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      background-image 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      color            1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color     1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow       1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      fill             1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      stroke           1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity          1.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* Also transition the background-image of #app-shell separately */
+body.theme-transitioning #app-shell {
+   transition:
+      background-color 2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow       1.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html {
+   scroll-behavior: smooth;
+   background: #050505;
+}
+
+/* ============================================
+   GLOBAL BACKGROUND — Dark Dragon (behind the floating card)
+   ============================================ */
 body {
    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-   background: var(--bg-primary);
    color: var(--text-primary);
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
    line-height: 1.5;
+   min-height: 100vh;
+   position: relative;
+   overflow-x: hidden;
+
+   /* Dark dragon wallpaper */
+   background-color: #080808;
+   background-image: url('/dragon-dark.png');
+   background-size: cover;
+   background-position: center center;
+   background-attachment: fixed;
+   background-repeat: no-repeat;
+}
+
+/* Golden vignette overlay on top of the dragon */
+body::before {
+   content: '';
+   position: fixed;
+   inset: 0;
+   pointer-events: none;
+   z-index: 0;
+   background:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(212, 175, 55, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 80% 110%, rgba(80, 40, 120, 0.12) 0%, transparent 55%),
+      linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.0) 70%, rgba(0,0,0,0.3) 100%);
+}
+
+body::after {
+   content: none;
+}
+
+/* ============================================
+   FLOATING CONTENT CARD — Dragon inside the shell
+   ============================================ */
+#app-shell {
+   position: relative;
+   z-index: 1;
+   max-width: 1440px;
+   margin: 0 auto;
+   min-height: 100vh;
+
+   /* Dark dragon background directly on the shell */
+   background-color: #0A0A0A;
+   background-image: url('/dragon-dark.png');
+   background-size: cover;
+   background-position: center center;
+   background-attachment: fixed;
+   background-repeat: no-repeat;
+
+   box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.12),
+      0 20px 80px rgba(0, 0, 0, 0.8),
+      0 40px 120px rgba(0, 0, 0, 0.6);
+   transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Dark translucent overlay so text remains readable while dragon shows through */
+#app-shell::before {
+   content: '';
+   position: fixed;
+   inset: 0;
+   z-index: 0;
+   pointer-events: none;
+   /* Semi-transparent dark wash — dragon visible at ~30% */
+   background: rgba(8, 8, 10, 0.72);
+}
+
+/* On wide screens, show the body background on sides */
+@media (min-width: 1440px) {
+   #app-shell {
+      border-radius: 0 0 20px 20px;
+      margin-bottom: 2rem;
+   }
+}
+
+/* All direct content inside the shell must be above the overlay */
+#app-shell > * {
+   position: relative;
+   z-index: 1;
+}
+
+/* Ensure header overlaps main content */
+#app-shell > header {
+   z-index: 1000;
 }
 
 a {
@@ -39,7 +152,7 @@ button {
 
 main {
    min-height: calc(100vh - var(--header-height));
-   background: var(--bg-primary);
+   background: transparent;
 }
 
 /* Scrollbar */
@@ -47,7 +160,7 @@ main {
    width: 6px;
 }
 ::-webkit-scrollbar-track {
-   background: var(--bg-secondary);
+   background: rgba(255,255,255,0.05);
 }
 ::-webkit-scrollbar-thumb {
    background: var(--gold-dark);
@@ -56,3 +169,26 @@ main {
 ::-webkit-scrollbar-thumb:hover {
    background: var(--gold-primary);
 }
+
+/* ============================================
+   LIGHT THEME — Light Elegance Dragon
+   ============================================ */
+body.light-theme {
+   background-color: #F5F0E8;
+}
+
+body.light-theme #app-shell {
+   background-color: #F8F4EC;
+   background-image: url('/dragon-light.png');
+   box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.25),
+      0 20px 80px rgba(150, 120, 60, 0.2),
+      0 40px 120px rgba(150, 120, 60, 0.12);
+}
+
+/* Light semi-transparent overlay — dragon visible at ~35% */
+body.light-theme #app-shell::before {
+   background: rgba(248, 244, 236, 0.68);
+}
+
+

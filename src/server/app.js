@@ -4,7 +4,6 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const { initDatabase } = require('../backend/config/database');
-const { seedDatabase } = require('../backend/config/seed');
 
 // Import routes
 const authRoutes = require('../backend/routes/auth');
@@ -15,6 +14,7 @@ const adminRoutes = require('../backend/routes/admin');
 const commentsRoutes = require('../backend/routes/comments');
 const bookmarksRoutes = require('../backend/routes/bookmarks');
 const notificationsRoutes = require('../backend/routes/notifications');
+const recommendationRoutes = require('../backend/routes/recommendations');
 
 // Create Express app
 const app = express();
@@ -25,11 +25,10 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize and seed database
-initDatabase().then(() => {
-  seedDatabase();
-}).catch(err => {
+// Initialize database (run pending migrations)
+initDatabase().catch((err) => {
   console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
 
 // Routes
@@ -41,6 +40,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/comments', commentsRoutes);
 app.use('/api/bookmarks', bookmarksRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

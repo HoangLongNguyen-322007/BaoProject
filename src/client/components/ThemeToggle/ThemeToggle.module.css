@@ -1,0 +1,98 @@
+.toggleContainer {
+   display: flex;
+   align-items: center;
+   margin-right: 0.5rem;
+}
+
+.toggleSwitch {
+   position: relative;
+   width: 80px;
+   height: 32px;
+   border-radius: 16px;
+   background: linear-gradient(90deg, #E2E2E2 50%, #2A2A2A 50%);
+   box-shadow: 
+      inset 0 3px 6px rgba(0, 0, 0, 0.4),
+      inset 0 1px 2px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 0 8px;
+   cursor: pointer;
+}
+
+/* Icons */
+.icon {
+   width: 14px;
+   height: 14px;
+   z-index: 1;
+   transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.iconActive {
+   opacity: 1;
+   transform: scale(1.1) translateY(0);
+   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+}
+
+.iconInactive {
+   opacity: 0.5;
+   transform: scale(0.85) translateY(1px);
+}
+
+.sunIcon {
+   color: #555;
+}
+
+.moonIcon {
+   color: #D4D4D4;
+}
+
+/* Metallic Thumb */
+.thumb {
+   position: absolute;
+   top: 50%;
+   width: 36px;
+   height: 36px;
+   border-radius: 50%;
+   background: conic-gradient(
+      from 0deg,
+      #C8C8C8, #F5F5F5, #FFFFFF, #F5F5F5, #C8C8C8, 
+      #A0A0A0, #C8C8C8, #F5F5F5, #FFFFFF, #F5F5F5, #C8C8C8
+   );
+   box-shadow: 
+      0 3px 8px rgba(0, 0, 0, 0.5),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.9),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+   z-index: 2;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   left: -2px;
+   /* Hardware accelerated, extremely smooth transition synced with theme change */
+   transition: transform 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.thumbLeft {
+   transform: translate(0, -50%);
+}
+
+.thumbRight {
+   /* 80px container - 36px thumb + 4px overlap = 48px */
+   transform: translate(46px, -50%);
+}
+
+.thumbInner {
+   width: 24px;
+   height: 24px;
+   border-radius: 50%;
+   background: conic-gradient(
+      from 90deg,
+      #C0C0C0, #F0F0F0, #D0D0D0, #A0A0A0, #C0C0C0
+   );
+   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Label removed since it is now a native HTML tooltip */

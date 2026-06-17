@@ -1,28 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './AdminDashboard.module.css';
-import { MOCK_ARTICLES } from '../../../utils/mockData';
+import { adminAPI, commentsAPI, tokenStorage } from '../../../utils/api';
 
-const ADMIN_MENU = [
-   { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊' },
-   { id: 'articles-pending', label: 'Bài chờ duyệt', icon: '📋', badge: 3 },
-   { id: 'articles-approved', label: 'Bài đã duyệt', icon: '✅', badge: 8 },
-   { id: 'articles-manage', label: 'Quản lý bài viết', icon: '📝' },
-   { id: 'categories-manage', label: 'Quản lý chuyên mục', icon: '📂' },
-   { id: 'users-manage', label: 'Quản lý người dùng', icon: '👥' },
-   { id: 'editors-manage', label: 'Quản lý biên tập viên', icon: '✏️' },
-   { id: 'contributors', label: 'Quản lý cộng tác viên', icon: '📄' },
-   { id: 'settings', label: 'Cài đặt hệ thống', icon: '⚙️' },
-];
-
-function SidebarNav({ activeTab, onTabChange }) {
+function SidebarNav({ activeTab, onTabChange, pendingCount = 0, approvedCount = 0 }) {
+   const menu = [
+      { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊' },
+      { id: 'articles-pending', label: 'Bài chờ duyệt', icon: '📋', badge: pendingCount },
+      { id: 'articles-approved', label: 'Bài chờ xuất bản', icon: '✅', badge: approvedCount },
+      { id: 'articles-manage', label: 'Quản lý bài viết', icon: '📝' },
+      { id: 'categories-manage', label: 'Quản lý chuyên mục', icon: '📂' },
+      { id: 'comments-manage', label: 'Quản lý bình luận', icon: '💬' },
+      { id: 'users-manage', label: 'Quản lý người dùng', icon: '👥' },
+      { id: 'logs', label: 'Nhật ký hệ thống', icon: '📜' },
+      { id: 'settings', label: 'Cài đặt hệ thống', icon: '⚙️' },
+   ];
    return (
       <aside className={styles.sidebar}>
          <div className={styles.sidebarHeader}>
             <span className={styles.sidebarLogo}>RỒNG VÀNG</span>
-            <span className={styles.sidebarSub}>— ADMIN —</span>
+            <span className={styles.sidebarSub}>— QUẢN TRỊ —</span>
          </div>
          <nav className={styles.sidebarNav}>
-            {ADMIN_MENU.map((item) => (
+            {menu.map((item) => (
                <button
                   key={item.id}
                   className={`${styles.navItem} ${activeTab === item.id ? styles.navItemActive : ''}`}
@@ -30,7 +29,7 @@ function SidebarNav({ activeTab, onTabChange }) {
                >
                   <span className={styles.navIcon}>{item.icon}</span>
                   <span className={styles.navLabel}>{item.label}</span>
-                  {item.badge && <span className={styles.navBadge}>{item.badge}</span>}
+                  {item.badge > 0 && <span className={styles.navBadge}>{item.badge}</span>}
                </button>
             ))}
          </nav>
@@ -38,7 +37,7 @@ function SidebarNav({ activeTab, onTabChange }) {
    );
 }
 
-function DashboardOverview() {
+function DashboardOverview({ stats }) {
    return (
       <section className={styles.dashboardSection}>
          <h1>Bảng Điều Khiển Quản Trị</h1>
@@ -47,81 +46,42 @@ function DashboardOverview() {
                <div className={styles.statIcon}>📰</div>
                <div className={styles.statText}>
                   <div className={styles.statLabel}>Tổng bài viết</div>
-                  <div className={styles.statValue}>1,245</div>
+                  <div className={styles.statValue}>{stats?.totalArticles || 0}</div>
+               </div>
+            </div>
+            <div className={styles.statBox}>
+               <div className={styles.statIcon}>✅</div>
+               <div className={styles.statText}>
+                  <div className={styles.statLabel}>Đã xuất bản</div>
+                  <div className={styles.statValue}>{stats?.publishedArticles || 0}</div>
+               </div>
+            </div>
+            <div className={styles.statBox}>
+               <div className={styles.statIcon}>⏳</div>
+               <div className={styles.statText}>
+                  <div className={styles.statLabel}>Đang chờ duyệt</div>
+                  <div className={styles.statValue}>{stats?.pendingArticles || 0}</div>
                </div>
             </div>
             <div className={styles.statBox}>
                <div className={styles.statIcon}>👥</div>
                <div className={styles.statText}>
+                  <div className={styles.statLabel}>Tổng người dùng</div>
+                  <div className={styles.statValue}>{stats?.totalUsers || 0}</div>
+               </div>
+            </div>
+            <div className={styles.statBox}>
+               <div className={styles.statIcon}>✍️</div>
+               <div className={styles.statText}>
                   <div className={styles.statLabel}>Tác giả</div>
-                  <div className={styles.statValue}>127</div>
+                  <div className={styles.statValue}>{stats?.totalAuthors || 0}</div>
                </div>
             </div>
             <div className={styles.statBox}>
                <div className={styles.statIcon}>✏️</div>
                <div className={styles.statText}>
                   <div className={styles.statLabel}>Biên tập viên</div>
-                  <div className={styles.statValue}>23</div>
-               </div>
-            </div>
-            <div className={styles.statBox}>
-               <div className={styles.statIcon}>👁️</div>
-               <div className={styles.statText}>
-                  <div className={styles.statLabel}>Tổng lượt xem</div>
-                  <div className={styles.statValue}>156.8K</div>
-               </div>
-            </div>
-            <div className={styles.statBox}>
-               <div className={styles.statIcon}>💬</div>
-               <div className={styles.statText}>
-                  <div className={styles.statLabel}>Bình luận</div>
-                  <div className={styles.statValue}>3,421</div>
-               </div>
-            </div>
-            <div className={styles.statBox}>
-               <div className={styles.statIcon}>📂</div>
-               <div className={styles.statText}>
-                  <div className={styles.statLabel}>Chuyên mục</div>
-                  <div className={styles.statValue}>12</div>
-               </div>
-            </div>
-         </div>
-
-         <div className={styles.chartsSection}>
-            <div className={styles.chartBox}>
-               <h2>Bài viết theo trạng thái</h2>
-               <div className={styles.chartPlaceholder}>
-                  <div className={styles.barChart}>
-                     <div className={styles.bar} style={{ height: '70%' }}>Nháp: 245</div>
-                     <div className={styles.bar} style={{ height: '40%' }}>Chờ duyệt: 98</div>
-                     <div className={styles.bar} style={{ height: '90%' }}>Đã duyệt: 654</div>
-                     <div className={styles.bar} style={{ height: '50%' }}>Từ chối: 145</div>
-                  </div>
-               </div>
-            </div>
-            <div className={styles.chartBox}>
-               <h2>Hoạt động gần đây</h2>
-               <div className={styles.activityList}>
-                  <div className={styles.activityItem}>
-                     <span className={styles.activityIcon}>📰</span>
-                     <span>Nguyễn Văn A đã xuất bản bài "Tin tức hôm nay"</span>
-                     <span className={styles.activityTime}>5 phút trước</span>
-                  </div>
-                  <div className={styles.activityItem}>
-                     <span className={styles.activityIcon}>👤</span>
-                     <span>Người dùng mới đăng ký: Trần Thị B</span>
-                     <span className={styles.activityTime}>12 phút trước</span>
-                  </div>
-                  <div className={styles.activityItem}>
-                     <span className={styles.activityIcon}>✏️</span>
-                     <span>Bài viết được sửa: "Kinh tế Việt Nam"</span>
-                     <span className={styles.activityTime}>28 phút trước</span>
-                  </div>
-                  <div className={styles.activityItem}>
-                     <span className={styles.activityIcon}>❌</span>
-                     <span>Bài viết bị từ chối: "Tin không xác minh"</span>
-                     <span className={styles.activityTime}>1 giờ trước</span>
-                  </div>
+                  <div className={styles.statValue}>{stats?.totalEditors || 0}</div>
                </div>
             </div>
          </div>
@@ -129,50 +89,40 @@ function DashboardOverview() {
    );
 }
 
-function ArticlesPendingTable({ articles }) {
+function ArticlesPendingTable({ articles, onView }) {
    return (
       <section className={styles.managementSection}>
-         <h1>Bài Viết Chờ Duyệt</h1>
-         <div className={styles.tableControls}>
-            <input type="text" placeholder="Tìm kiếm bài viết..." className={styles.searchInput} />
-            <button className={styles.btnPrimary}>🔄 Làm mới</button>
-         </div>
-
+         <h1>Bài Viết Chờ Biên Tập Duyệt</h1>
          <div className={styles.articlesTable}>
             <div className={styles.tableHeader}>
                <span>ID</span>
                <span>Tiêu đề</span>
                <span>Tác giả</span>
-               <span>Ngày gửi</span>
-               <span>Hành động</span>
+               <span>Ngày tạo</span>
+               <span>Trạng thái</span>
             </div>
-            {articles.slice(0, 3).map((article) => (
-               <div key={article.id} className={styles.tableRow}>
-                  <span>#{article.id}</span>
-                  <span className={styles.title}>{article.title}</span>
-                  <span>{article.author}</span>
-                  <span>{new Date(article.date).toLocaleDateString('vi-VN')}</span>
-                  <span className={styles.actions}>
-                     <button className={styles.btnSmall}>Xem</button>
-                     <button className={styles.btnSmallApprove}>✅ Duyệt</button>
-                     <button className={styles.btnSmallDanger}>❌ Từ chối</button>
-                  </span>
-               </div>
-            ))}
+            {articles.length === 0 ? (
+               <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Không có bài viết chờ duyệt.</div>
+            ) : (
+               articles.map((article) => (
+                  <div key={article.id} className={styles.tableRow}>
+                     <span>#{article.id.substring(0, 8)}...</span>
+                     <span className={styles.title}>{article.title}</span>
+                     <span>{article.authorName || article.author || 'Tác giả'}</span>
+                     <span>{new Date(article.createdAt).toLocaleDateString('vi-VN')}</span>
+                     <span style={{ color: 'var(--gold-primary)' }}>📋 Chờ duyệt</span>
+                  </div>
+               ))
+            )}
          </div>
       </section>
    );
 }
 
-function ArticlesApprovedTable({ articles }) {
+function ArticlesApprovedTable({ articles, onPublish }) {
    return (
       <section className={styles.managementSection}>
-         <h1>Bài Viết Đã Duyệt</h1>
-         <div className={styles.tableControls}>
-            <input type="text" placeholder="Tìm kiếm bài viết..." className={styles.searchInput} />
-            <button className={styles.btnPrimary}>📰 Xuất bản tất cả</button>
-         </div>
-
+         <h1>Bài Viết Chờ Xuất Bản</h1>
          <div className={styles.articlesTable}>
             <div className={styles.tableHeader}>
                <span>ID</span>
@@ -181,94 +131,121 @@ function ArticlesApprovedTable({ articles }) {
                <span>Ngày duyệt</span>
                <span>Hành động</span>
             </div>
-            {articles.slice(3, 8).map((article) => (
-               <div key={article.id} className={styles.tableRow}>
-                  <span>#{article.id}</span>
-                  <span className={styles.title}>{article.title}</span>
-                  <span>{article.author}</span>
-                  <span>{new Date(article.date).toLocaleDateString('vi-VN')}</span>
-                  <span className={styles.actions}>
-                     <button className={styles.btnSmall}>Xem</button>
-                     <button className={styles.btnSmall}>Sửa</button>
-                     <button className={styles.btnSmallDanger}>Xóa</button>
-                  </span>
-               </div>
-            ))}
+            {articles.length === 0 ? (
+               <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Không có bài viết chờ xuất bản.</div>
+            ) : (
+               articles.map((article) => (
+                  <div key={article.id} className={styles.tableRow}>
+                     <span>#{article.id.substring(0, 8)}...</span>
+                     <span className={styles.title}>{article.title}</span>
+                     <span>{article.authorName || article.author || 'Tác giả'}</span>
+                     <span>{new Date(article.updatedAt || article.createdAt).toLocaleDateString('vi-VN')}</span>
+                     <span className={styles.actions}>
+                        <button className={styles.btnSmallApprove} onClick={() => onPublish(article.id)}>📰 Xuất bản ngay</button>
+                     </span>
+                  </div>
+               ))
+            )}
          </div>
       </section>
    );
 }
 
-function ArticlesManagementTable({ articles }) {
+function ArticlesManagementTable({ articles, onDelete }) {
+   const [filter, setFilter] = useState('all');
+   const [search, setSearch] = useState('');
+
+   const filtered = articles.filter((a) => {
+      const matchFilter = filter === 'all' || a.status === filter;
+      const matchSearch = a.title.toLowerCase().includes(search.toLowerCase());
+      return matchFilter && matchSearch;
+   });
+
    return (
       <section className={styles.managementSection}>
-         <h1>Quản Lý Bài Viết</h1>
+         <h1>Quản Lý Toàn Bộ Bài Viết</h1>
          <div className={styles.tableControls}>
-            <input type="text" placeholder="Tìm kiếm bài viết..." className={styles.searchInput} />
-            <select className={styles.filterSelect}>
-               <option>Tất cả trạng thái</option>
-               <option>Nháp</option>
-               <option>Chờ duyệt</option>
-               <option>Đã duyệt</option>
-               <option>Đã đăng</option>
+            <input 
+               type="text" 
+               placeholder="Tìm kiếm bài viết..." 
+               className={styles.searchInput} 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+            />
+            <select className={styles.filterSelect} value={filter} onChange={(e) => setFilter(e.target.value)}>
+               <option value="all">Tất cả trạng thái</option>
+               <option value="draft">Nháp</option>
+               <option value="pending">Chờ duyệt</option>
+               <option value="approved">Chờ đăng</option>
+               <option value="published">Đã đăng</option>
             </select>
-            <button className={styles.btnPrimary}>+ Bài viết mới</button>
          </div>
 
          <div className={styles.articlesTable}>
             <div className={styles.tableHeader}>
                <span>ID</span>
                <span>Tiêu đề</span>
-               <span>Tác giả</span>
+               <span>Chuyên mục</span>
                <span>Trạng thái</span>
-               <span>Ngày tạo</span>
+               <span>Lượt xem</span>
                <span>Hành động</span>
             </div>
-            {articles.map((article) => (
-               <div key={article.id} className={styles.tableRow}>
-                  <span>#{article.id}</span>
-                  <span className={styles.title}>{article.title}</span>
-                  <span>{article.author}</span>
-                  <span>
-                     <span className={styles.statusBadge}>Đã đăng</span>
-                  </span>
-                  <span>{new Date(article.date).toLocaleDateString('vi-VN')}</span>
-                  <span className={styles.actions}>
-                     <button className={styles.btnSmall}>Xem</button>
-                     <button className={styles.btnSmall}>Sửa</button>
-                     <button className={styles.btnSmallDanger}>Xóa</button>
-                  </span>
-               </div>
-            ))}
+            {filtered.length === 0 ? (
+               <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Không tìm thấy bài viết nào.</div>
+            ) : (
+               filtered.map((article) => (
+                  <div key={article.id} className={styles.tableRow}>
+                     <span>#{article.id.substring(0, 8)}</span>
+                     <span className={styles.title}>{article.title}</span>
+                     <span>{article.category}</span>
+                     <span>
+                        <span className={`${styles.statusBadge} ${article.status === 'published' ? styles.statusApproved : ''}`}>
+                           {article.status.toUpperCase()}
+                        </span>
+                     </span>
+                     <span>👁️ {article.views || 0}</span>
+                     <span className={styles.actions}>
+                        <button className={styles.btnSmallDanger} onClick={() => onDelete(article.id)}>🗑️ Xóa</button>
+                     </span>
+                  </div>
+               ))
+            )}
          </div>
       </section>
    );
 }
 
-function CategoriesManagement() {
-   const categories = [
-      { id: 1, name: 'Thời sự', color: '#ff6b6b', articles: 245 },
-      { id: 2, name: 'Kinh tế', color: '#4ecdc4', articles: 189 },
-      { id: 3, name: 'Công nghệ', color: '#45b7d1', articles: 156 },
-      { id: 4, name: 'Thể thao', color: '#f9ca24', articles: 134 },
-      { id: 5, name: 'Giải trí', color: '#6c5ce7', articles: 201 },
-      { id: 6, name: 'Sức khỏe', color: '#a29bfe', articles: 98 },
-   ];
+function CategoriesManagement({ categories, onCreate, onDelete }) {
+   const [name, setName] = useState('');
+   const [slug, setSlug] = useState('');
+   const [color, setColor] = useState('#D4AF37');
+
+   const handleSubmit = (e) => {
+      e.preventDefault();
+      if (!name || !slug) return;
+      onCreate({ name, slug, color });
+      setName('');
+      setSlug('');
+   };
 
    return (
       <section className={styles.managementSection}>
          <h1>Quản Lý Chuyên Mục</h1>
-         <button className={styles.btnPrimary}>+ Thêm chuyên mục</button>
+         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1rem', background: '#141414', padding: '1rem', borderRadius: '4px', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <input type="text" placeholder="Tên chuyên mục..." value={name} onChange={(e) => setName(e.target.value)} required className={styles.settingInput} style={{ flex: 1, minWidth: '150px' }} />
+            <input type="text" placeholder="Slug (ví dụ: thoisu)..." value={slug} onChange={(e) => setSlug(e.target.value)} required className={styles.settingInput} style={{ flex: 1, minWidth: '150px' }} />
+            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ width: '40px', height: '40px', border: 'none', background: 'transparent', cursor: 'pointer' }} />
+            <button type="submit" className={styles.btnPrimary} style={{ height: '40px' }}>➕ Thêm</button>
+         </form>
 
          <div className={styles.categoriesGrid}>
             {categories.map((cat) => (
                <div key={cat.id} className={styles.categoryCard}>
-                  <div className={styles.categoryColor} style={{ backgroundColor: cat.color }} />
+                  <div className={styles.categoryColor} style={{ backgroundColor: cat.color || '#D4AF37' }} />
                   <h3>{cat.name}</h3>
-                  <p>{cat.articles} bài viết</p>
+                  <p>Slug: <code>{cat.slug}</code></p>
                   <div className={styles.categoryActions}>
-                     <button className={styles.btnSmall}>Sửa</button>
-                     <button className={styles.btnSmallDanger}>Xóa</button>
+                     <button className={styles.btnSmallDanger} onClick={() => onDelete(cat.id)}>Xóa</button>
                   </div>
                </div>
             ))}
@@ -277,50 +254,118 @@ function CategoriesManagement() {
    );
 }
 
-function UsersManagement() {
-   const users = [
-      { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@example.com', role: 'Author', joinDate: '2024-03-15' },
-      { id: 2, name: 'Trần Thị B', email: 'tranthib@example.com', role: 'Author', joinDate: '2024-04-20' },
-      { id: 3, name: 'Lê Văn C', email: 'levcan@example.com', role: 'Author', joinDate: '2024-05-10' },
-      { id: 4, name: 'Phạm Thị D', email: 'phamthid@example.com', role: 'Author', joinDate: '2024-02-28' },
-      { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@example.com', role: 'Author', joinDate: '2024-01-15' },
-   ];
+function CommentsManagement({ comments, onDelete }) {
+   const [search, setSearch] = useState('');
+
+   const filtered = comments.filter((c) =>
+      c.content.toLowerCase().includes(search.toLowerCase()) ||
+      (c.userName && c.userName.toLowerCase().includes(search.toLowerCase())) ||
+      (c.articleTitle && c.articleTitle.toLowerCase().includes(search.toLowerCase()))
+   );
 
    return (
       <section className={styles.managementSection}>
-         <h1>Quản Lý Người Dùng</h1>
+         <h1>Quản Lý Bình Luận Độc Giả</h1>
          <div className={styles.tableControls}>
-            <input type="text" placeholder="Tìm kiếm người dùng..." className={styles.searchInput} />
-            <select className={styles.filterSelect}>
-               <option>Tất cả vai trò</option>
-               <option>Author</option>
-               <option>Editor</option>
-               <option>Admin</option>
-            </select>
+            <input 
+               type="text" 
+               placeholder="Tìm theo nội dung, người gửi hoặc bài viết..." 
+               className={styles.searchInput} 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+            />
          </div>
 
          <div className={styles.articlesTable}>
             <div className={styles.tableHeader}>
-               <span>ID</span>
-               <span>Tên</span>
-               <span>Email</span>
-               <span>Vai trò</span>
-               <span>Ngày tham gia</span>
+               <span>Người gửi</span>
+               <span>Bài viết</span>
+               <span>Nội dung bình luận</span>
+               <span>Ngày gửi</span>
                <span>Hành động</span>
             </div>
-            {users.map((user) => (
+            {filtered.length === 0 ? (
+               <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Không tìm thấy bình luận nào.</div>
+            ) : (
+               filtered.map((comment) => (
+                  <div key={comment.id} className={styles.tableRow}>
+                     <span className={styles.title}>
+                        {comment.userName || 'Ẩn danh'}
+                        <br/>
+                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{comment.userEmail}</span>
+                     </span>
+                     <span>{comment.articleTitle || 'Bài viết'}</span>
+                     <span style={{ fontStyle: 'italic', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '300px' }}>
+                        "{comment.content}"
+                     </span>
+                     <span>{new Date(comment.createdAt).toLocaleDateString('vi-VN')}</span>
+                     <span className={styles.actions}>
+                        <button className={styles.btnSmallDanger} onClick={() => onDelete(comment.id)}>🗑️ Xóa</button>
+                     </span>
+                  </div>
+               ))
+            )}
+         </div>
+      </section>
+   );
+}
+
+function UsersManagement({ users, onUpdateRole, onSuspend, onActivate }) {
+   const [search, setSearch] = useState('');
+
+   const filtered = users.filter((u) => 
+      u.email.toLowerCase().includes(search.toLowerCase()) || 
+      (u.fullName && u.fullName.toLowerCase().includes(search.toLowerCase()))
+   );
+
+   return (
+      <section className={styles.managementSection}>
+         <h1>Quản Lý Tài Khoản Thành Viên</h1>
+         <div className={styles.tableControls}>
+            <input 
+               type="text" 
+               placeholder="Tìm kiếm theo tên hoặc email..." 
+               className={styles.searchInput} 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+            />
+         </div>
+
+         <div className={styles.articlesTable}>
+            <div className={styles.tableHeader}>
+               <span>Tên thành viên</span>
+               <span>Email</span>
+               <span>Vai trò</span>
+               <span>Trạng thái</span>
+               <span>Hành động</span>
+            </div>
+            {filtered.map((user) => (
                <div key={user.id} className={styles.tableRow}>
-                  <span>#{user.id}</span>
-                  <span className={styles.title}>{user.name}</span>
+                  <span className={styles.title}>{user.fullName || 'Chưa đặt tên'}</span>
                   <span>{user.email}</span>
                   <span>
-                     <span className={styles.roleBadge}>{user.role}</span>
+                     <select 
+                        value={user.role} 
+                        onChange={(e) => onUpdateRole(user.id, e.target.value)}
+                        style={{ background: '#1c1c1c', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', padding: '0.2rem 0.5rem', borderRadius: '3px', outline: 'none' }}
+                     >
+                        <option value="guest">Guest</option>
+                        <option value="author">Author</option>
+                        <option value="editor">Editor</option>
+                        <option value="admin">Admin</option>
+                     </select>
                   </span>
-                  <span>{user.joinDate}</span>
+                  <span>
+                     <span style={{ color: user.status === 'suspended' ? '#ff4757' : '#2ed573' }}>
+                        {user.status === 'suspended' ? '🚫 Khóa' : '✅ Active'}
+                     </span>
+                  </span>
                   <span className={styles.actions}>
-                     <button className={styles.btnSmall}>Chi tiết</button>
-                     <button className={styles.btnSmall}>Sửa</button>
-                     <button className={styles.btnSmallDanger}>Khóa</button>
+                     {user.status === 'suspended' ? (
+                        <button className={styles.btnSmall} onClick={() => onActivate(user.id)}>🔓 Mở khóa</button>
+                     ) : (
+                        <button className={styles.btnSmallDanger} onClick={() => onSuspend(user.id)}>🚫 Khóa</button>
+                     )}
                   </span>
                </div>
             ))}
@@ -329,42 +374,27 @@ function UsersManagement() {
    );
 }
 
-function EditorsManagement() {
-   const editors = [
-      { id: 1, name: 'Trần Minh Đức', email: 'minhduc@baorongvang.vn', level: 'Cấp 2', articles: 245, approved: 234 },
-      { id: 2, name: 'Lê Thị Hương', email: 'huong@baorongvang.vn', level: 'Cấp 1', articles: 189, approved: 178 },
-      { id: 3, name: 'Nguyễn Công Minh', email: 'minhnc@baorongvang.vn', level: 'Cấp 3', articles: 312, approved: 301 },
-   ];
-
+function SystemLogs({ logs }) {
    return (
       <section className={styles.managementSection}>
-         <h1>Quản Lý Biên Tập Viên</h1>
-         <button className={styles.btnPrimary}>+ Thêm biên tập viên</button>
-
+         <h1>Nhật Ký Hoạt Động Hệ Thống</h1>
          <div className={styles.articlesTable}>
             <div className={styles.tableHeader}>
-               <span>Tên</span>
-               <span>Email</span>
-               <span>Cấp độ</span>
-               <span>Bài duyệt</span>
-               <span>Duyệt thành công</span>
+               <span>Thời gian</span>
                <span>Hành động</span>
+               <span>Nội dung mô tả</span>
             </div>
-            {editors.map((editor) => (
-               <div key={editor.id} className={styles.tableRow}>
-                  <span className={styles.title}>{editor.name}</span>
-                  <span>{editor.email}</span>
-                  <span>
-                     <span className={styles.levelBadge}>{editor.level}</span>
-                  </span>
-                  <span>{editor.articles}</span>
-                  <span>{editor.approved}</span>
-                  <span className={styles.actions}>
-                     <button className={styles.btnSmall}>Sửa</button>
-                     <button className={styles.btnSmallDanger}>Xóa</button>
-                  </span>
-               </div>
-            ))}
+            {logs.length === 0 ? (
+               <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Không có log hoạt động nào.</div>
+            ) : (
+               logs.map((log) => (
+                  <div key={log.id} className={styles.tableRow}>
+                     <span>{new Date(log.createdAt).toLocaleString('vi-VN')}</span>
+                     <span style={{ color: 'var(--gold-primary)', fontWeight: 600 }}>{log.action}</span>
+                     <span>{log.description}</span>
+                  </div>
+               ))
+            )}
          </div>
       </section>
    );
@@ -376,81 +406,173 @@ function SystemSettings() {
          <h1>Cài Đặt Hệ Thống</h1>
 
          <div className={styles.settingsGroup}>
-            <h2>Thông Tin Chung</h2>
+            <h2>Thông Tin Trang Tin</h2>
             <div className={styles.settingRow}>
                <label>Tên trang web:</label>
-               <input type="text" defaultValue="Báo Rồng Vàng" className={styles.settingInput} />
+               <input type="text" defaultValue="Báo Rồng Vàng" className={styles.settingInput} readOnly />
             </div>
             <div className={styles.settingRow}>
-               <label>Mô tả:</label>
-               <textarea defaultValue="Website đọc báo nhưng bản temu" className={styles.settingTextarea} />
-            </div>
-            <div className={styles.settingRow}>
-               <label>Email liên hệ:</label>
-               <input type="email" defaultValue="info@baorongvang.vn" className={styles.settingInput} />
+               <label>Khẩu hiệu:</label>
+               <input type="text" defaultValue="Thông tin trung thực - Kịp thời - Khách quan" className={styles.settingInput} readOnly />
             </div>
          </div>
-
-         <div className={styles.settingsGroup}>
-            <h2>Cài Đặt Nội Dung</h2>
-            <div className={styles.settingRow}>
-               <label>Bài viết trên trang: </label>
-               <input type="number" defaultValue="12" className={styles.settingInput} style={{ maxWidth: '100px' }} />
-            </div>
-            <div className={styles.settingRow}>
-               <label>
-                  <input type="checkbox" defaultChecked /> Yêu cầu duyệt bài trước khi xuất bản
-               </label>
-            </div>
-            <div className={styles.settingRow}>
-               <label>
-                  <input type="checkbox" defaultChecked /> Cho phép bình luận trên bài viết
-               </label>
-            </div>
-            <div className={styles.settingRow}>
-               <label>
-                  <input type="checkbox" /> Duyệt bình luận trước khi hiển thị
-               </label>
-            </div>
-         </div>
-
-         <div className={styles.settingsGroup}>
-            <h2>Bảo Mật</h2>
-            <div className={styles.settingRow}>
-               <label>Thời hạn hết hạn phiên (phút):</label>
-               <input type="number" defaultValue="30" className={styles.settingInput} style={{ maxWidth: '100px' }} />
-            </div>
-            <div className={styles.settingRow}>
-               <label>
-                  <input type="checkbox" defaultChecked /> Bật 2FA (Two-Factor Authentication)
-               </label>
-            </div>
-         </div>
-
-         <button className={styles.btnPrimary} style={{ marginTop: '2rem' }}>
-            💾 Lưu cài đặt
-         </button>
+         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontStyle: 'italic' }}>Các thông số cấu hình hệ thống đang được quản trị tự động qua biến môi trường (.env).</p>
       </section>
    );
 }
 
 export default function AdminDashboard() {
    const [activeTab, setActiveTab] = useState('dashboard');
-   const articles = MOCK_ARTICLES.slice(0, 8);
+   const [articles, setArticles] = useState([]);
+   const [categories, setCategories] = useState([]);
+   const [users, setUsers] = useState([]);
+   const [comments, setComments] = useState([]);
+   const [logs, setLogs] = useState([]);
+   const [stats, setStats] = useState(null);
+   const [loading, setLoading] = useState(true);
+
+   const fetchAdminData = async () => {
+      setLoading(true);
+      try {
+         const [allArticles, allCategories, allUsers, allLogs, statsData, allComments] = await Promise.all([
+            adminAPI.getAllArticles(200, 0),
+            adminAPI.getCategories(),
+            adminAPI.getUsers(200, 0),
+            adminAPI.getLogs(50, 0),
+            adminAPI.getStats(),
+            commentsAPI.getAll()
+         ]);
+         setArticles(allArticles || []);
+         setCategories(allCategories || []);
+         setUsers(allUsers || []);
+         setLogs(allLogs || []);
+         setStats(statsData || null);
+         setComments(allComments || []);
+      } catch (err) {
+         console.error('Failed to load admin dashboard data:', err);
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   useEffect(() => {
+      fetchAdminData();
+   }, []);
+
+   const handlePublish = async (id) => {
+      if (!window.confirm('Bạn có muốn xuất bản bài viết này lên trang chủ công khai không?')) return;
+      try {
+         await adminAPI.publishArticle(id);
+         alert('Đã xuất bản bài viết thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Xuất bản thất bại: ' + err.message);
+      }
+   };
+
+   const handleDeleteArticle = async (id) => {
+      if (!window.confirm('Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.')) return;
+      try {
+         await adminAPI.deleteArticle(id);
+         alert('Đã xóa bài viết khỏi hệ thống!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Xóa bài viết thất bại: ' + err.message);
+      }
+   };
+
+   const handleCreateCategory = async (catData) => {
+      try {
+         await adminAPI.createCategory(catData);
+         alert('Đã tạo chuyên mục mới thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Tạo chuyên mục thất bại: ' + err.message);
+      }
+   };
+
+   const handleDeleteCategory = async (id) => {
+      if (!window.confirm('Bạn có chắc chắn muốn xóa chuyên mục này không?')) return;
+      try {
+         await adminAPI.deleteCategory(id);
+         alert('Đã xóa chuyên mục thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Xóa chuyên mục thất bại: ' + err.message);
+      }
+   };
+
+   const handleUpdateUserRole = async (userId, role) => {
+      try {
+         await adminAPI.updateUserRole(userId, role);
+         alert('Đã cập nhật vai trò người dùng thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Cập nhật vai trò thất bại: ' + err.message);
+      }
+   };
+
+   const handleSuspendUser = async (userId) => {
+      try {
+         await adminAPI.suspendUser(userId);
+         alert('Đã khóa tài khoản thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Khóa tài khoản thất bại: ' + err.message);
+      }
+   };
+
+   const handleActivateUser = async (userId) => {
+      try {
+         await adminAPI.activateUser(userId);
+         alert('Đã mở khóa tài khoản thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Mở khóa tài khoản thất bại: ' + err.message);
+      }
+   };
+
+   const handleDeleteComment = async (id) => {
+      if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?')) return;
+      try {
+         await commentsAPI.delete(id);
+         alert('Đã xóa bình luận thành công!');
+         fetchAdminData();
+      } catch (err) {
+         alert('Xóa bình luận thất bại: ' + err.message);
+      }
+   };
+
+   const pendingArticles = articles.filter((a) => a.status === 'pending');
+   const approvedArticles = articles.filter((a) => a.status === 'approved');
 
    return (
       <div className={styles.adminDashboard}>
-         <SidebarNav activeTab={activeTab} onTabChange={setActiveTab} />
+         <SidebarNav 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab} 
+            pendingCount={pendingArticles.length}
+            approvedCount={approvedArticles.length}
+         />
 
          <main className={styles.mainContent}>
-            {activeTab === 'dashboard' && <DashboardOverview />}
-            {activeTab === 'articles-pending' && <ArticlesPendingTable articles={articles} />}
-            {activeTab === 'articles-approved' && <ArticlesApprovedTable articles={articles} />}
-            {activeTab === 'articles-manage' && <ArticlesManagementTable articles={articles} />}
-            {activeTab === 'categories-manage' && <CategoriesManagement />}
-            {activeTab === 'users-manage' && <UsersManagement />}
-            {activeTab === 'editors-manage' && <EditorsManagement />}
-            {activeTab === 'settings' && <SystemSettings />}
+            {loading ? (
+               <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem', color: 'var(--gold-primary)' }}>
+                  Đang tải dữ liệu hệ thống quản trị...
+               </div>
+            ) : (
+               <>
+                  {activeTab === 'dashboard' && <DashboardOverview stats={stats} />}
+                  {activeTab === 'articles-pending' && <ArticlesPendingTable articles={pendingArticles} />}
+                  {activeTab === 'articles-approved' && <ArticlesApprovedTable articles={approvedArticles} onPublish={handlePublish} />}
+                  {activeTab === 'articles-manage' && <ArticlesManagementTable articles={articles} onDelete={handleDeleteArticle} />}
+                  {activeTab === 'categories-manage' && <CategoriesManagement categories={categories} onCreate={handleCreateCategory} onDelete={handleDeleteCategory} />}
+                  {activeTab === 'comments-manage' && <CommentsManagement comments={comments} onDelete={handleDeleteComment} />}
+                  {activeTab === 'users-manage' && <UsersManagement users={users} onUpdateRole={handleUpdateUserRole} onSuspend={handleSuspendUser} onActivate={handleActivateUser} />}
+                  {activeTab === 'logs' && <SystemLogs logs={logs} />}
+                  {activeTab === 'settings' && <SystemSettings />}
+               </>
+            )}
          </main>
       </div>
    );

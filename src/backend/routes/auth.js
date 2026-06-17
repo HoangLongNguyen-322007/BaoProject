@@ -111,4 +111,34 @@ router.put('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// Change password
+router.put('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new password required' });
+    }
+
+    // Since findById returns password or not? Wait, in userRepository.js, findById does NOT return the password column!
+    // But findByEmail does select *! So findByEmail returns the password column.
+    const user = await userRepository.findByEmail(req.user.email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Mật khẩu hiện tại không chính xác' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await userRepository.updatePassword(req.user.id, hashedNewPassword);
+
+    res.json({ message: 'Đổi mật khẩu thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to change password', error: error.message });
+  }
+});
+
 module.exports = router;

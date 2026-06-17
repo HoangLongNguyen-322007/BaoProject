@@ -5,7 +5,7 @@
 
 .page {
    min-height: 100vh;
-   background: #0E0E0E;
+   background: transparent;
    display: flex;
    align-items: center;
    justify-content: center;
@@ -75,8 +75,8 @@
 /* ---- Form Box ---- */
 .formBox {
    width: 100%;
-   background: #1A1A1A;
-   border: 1px solid #2A2A2A;
+   background: var(--bg-card);
+   border: 1px solid var(--bg-border);
    border-radius: 14px;
    padding: 1.75rem 1.5rem;
    position: relative;
@@ -115,8 +115,8 @@
 .inputGroup {
    display: flex;
    align-items: center;
-   background: #252525;
-   border: 1px solid #333;
+   background: var(--bg-hover);
+   border: 1px solid var(--bg-border);
    border-radius: 8px;
    margin-bottom: 0.85rem;
    transition: border-color 0.2s, box-shadow 0.2s;

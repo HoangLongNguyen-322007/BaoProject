@@ -2,12 +2,12 @@ const { pool } = require('../config/database');
 
 class NotificationRepository {
   async create(notificationData) {
-    const { user_id, title, message, type } = notificationData;
+    const { user_id, title, message, type, relatedId } = notificationData;
     const result = await pool.query(
-      `INSERT INTO notifications (user_id, title, message, type, "isRead")
-       VALUES ($1, $2, $3, $4, FALSE)
+      `INSERT INTO notifications (user_id, title, message, type, "relatedId", "isRead")
+       VALUES ($1, $2, $3, $4, $5, FALSE)
        RETURNING *`,
-      [user_id, title, message, type || 'system']
+      [user_id, title, message, type || 'system', relatedId || null]
     );
     return result.rows[0];
   }
