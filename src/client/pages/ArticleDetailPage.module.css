@@ -1073,3 +1073,26 @@
    font-weight: 700;
    margin-left: 0.2rem;
 }
+
+/* Thêm css cho nội dung HTML từ Scraper */
+.htmlContent p {
+   margin-bottom: 1.5rem;
+   text-align: justify;
+   line-height: 1.8;
+}
+
+.htmlContent ul, .htmlContent ol {
+   margin-bottom: 1.5rem;
+   padding-left: 1.5rem;
+   line-height: 1.8;
+}
+
+.htmlContent li {
+   margin-bottom: 0.5rem;
+}
+
+.htmlContent img {
+   max-width: 100%;
+   height: auto;
+   border-radius: 8px;
+}

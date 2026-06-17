@@ -10,6 +10,7 @@ const getTimeAgo = (dateStr) => {
    const date = new Date(dateStr);
    const now = new Date();
    const diffMs = now - date;
+   if (diffMs < 60000) return 'Vừa xong';
    const diffMins = Math.floor(diffMs / 60000);
    const diffHours = Math.floor(diffMins / 60);
    if (diffMins < 60) return `${diffMins} phút trước`;
@@ -156,7 +157,6 @@ function ArticleDetailPage() {
          const commentsData = await commentsAPI.getByArticle(id);
          setComments(commentsData);
          setNewCommentText('');
-         alert('Đăng bình luận thành công!');
       } catch (err) {
          alert('Lỗi: ' + err.message);
       }
@@ -245,34 +245,13 @@ function ArticleDetailPage() {
    };
 
    const renderContent = () => {
-      // Simple plain text renderer for our DB articles
       if (!article.content) return null;
-      return article.content.split('\n\n').map((paragraph, idx) => {
-         const trimmed = paragraph.trim();
-         if (!trimmed) return null;
-         if (trimmed.startsWith('### ')) {
-            return (
-               <h3 key={idx} className={styles.subheading}>
-                  {trimmed.replace('### ', '')}
-               </h3>
-            );
-         }
-         if (trimmed.startsWith('> ')) {
-            const quoteContent = trimmed.replace('> ', '');
-            const parts = quoteContent.split(' — ');
-            return (
-               <blockquote key={idx} className={styles.blockquote}>
-                  <p className={styles.quoteText}>“{parts[0]}”</p>
-                  {parts[1] && <span className={styles.quoteAuthor}>— {parts[1]}</span>}
-               </blockquote>
-            );
-         }
-         return (
-            <p key={idx} className={styles.paragraph}>
-               {trimmed}
-            </p>
-         );
-      });
+      return (
+         <div 
+            className={styles.htmlContent}
+            dangerouslySetInnerHTML={{ __html: article.content }} 
+         />
+      );
    };
 
    return (

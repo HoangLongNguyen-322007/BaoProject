@@ -468,11 +468,10 @@ const recommendationAPI = {
    getLikeStatus: (articleId) =>
       apiCall('GET', `/recommendations/${articleId}/like-status`),
 
-   getRecommendations: (limit = 12) =>
-      apiCall('GET', `/recommendations/recommendations?limit=${limit}`),
-
-   getPopular: (limit = 12) =>
-      apiCall('GET', `/recommendations/popular?limit=${limit}`),
+   getRecommendations: (limit = 12) => apiCall('GET', `/recommendations/recommendations?limit=${limit}`),
+   getPopular: (limit = 12) => apiCall('GET', `/recommendations/popular?limit=${limit}`),
+   getDaily: (limit = 6) => apiCall('GET', `/recommendations/daily?limit=${limit}`),
+   trackRead: (articleId, category) => apiCall('POST', '/recommendations/track-read', { articleId, category }),
 
    getPreferences: () =>
       apiCall('GET', '/recommendations/preferences'),

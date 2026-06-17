@@ -191,6 +191,47 @@ class RecommendationRepository {
   }
 
   /**
+   * Thuật toán: Tiêu điểm trong ngày (Trending Today)
+   * Lấy bài viết trong 48 giờ qua, sắp xếp theo: (views * 1 + likes * 3)
+   */
+  async getDailyRecommendations(limit = 6) {
+    const query = `
+      SELECT *, 
+        (views * 1 + COALESCE(likes, 0) * 3) as trending_score,
+        'daily' as rec_type
+      FROM v_published_articles
+      WHERE "publishedAt" > NOW() - INTERVAL '48 hours'
+      ORDER BY trending_score DESC, "publishedAt" DESC
+      LIMIT $1
+    `;
+    const result = await pool.query(query, [limit]);
+    
+    // Nếu không đủ bài trong 48h, fallback lấy bài nhiều view nhất chưa được chọn
+    if (result.rows.length < limit) {
+      const remaining = limit - result.rows.length;
+      const excludeIds = result.rows.map(r => r.id);
+      const placeholders = excludeIds.length > 0 
+        ? `AND id NOT IN (${excludeIds.map((_, i) => `$${i + 2}`).join(',')})`
+        : '';
+        
+      const fallbackQuery = `
+        SELECT *, 
+          (views * 1 + COALESCE(likes, 0) * 3) as trending_score,
+          'daily_fallback' as rec_type
+        FROM v_published_articles
+        WHERE 1=1 ${placeholders}
+        ORDER BY trending_score DESC, "publishedAt" DESC
+        LIMIT $1
+      `;
+      
+      const fallbackResult = await pool.query(fallbackQuery, [remaining, ...excludeIds]);
+      return [...result.rows, ...fallbackResult.rows];
+    }
+    
+    return result.rows;
+  }
+
+  /**
    * Bài viết phổ biến nhất (fallback cho user chưa có dữ liệu)
    */
   async getPopularArticles(limit = 12) {

@@ -3,6 +3,17 @@ const router = express.Router();
 const recommendationRepository = require('../Repositories/recommendationRepository');
 const { authMiddleware } = require('../Middleware/auth');
 
+// ====== GET DAILY RECOMMENDATIONS ======
+router.get('/daily', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 6;
+    const recs = await recommendationRepository.getDailyRecommendations(limit);
+    res.json(recs);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to get daily recommendations', error: error.message });
+  }
+});
+
 // ====== TRACK READING (authenticated) ======
 router.post('/track-read', authMiddleware, async (req, res) => {
   try {

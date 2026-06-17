@@ -23,6 +23,7 @@ const getTimeAgo = (dateStr) => {
    const date = new Date(dateStr);
    const now = new Date();
    const diffMs = now - date;
+   if (diffMs < 60000) return 'Vừa xong';
    const diffMins = Math.floor(diffMs / 60000);
    const diffHours = Math.floor(diffMins / 60);
    if (diffMins < 60) return `${diffMins} phút trước`;
@@ -141,6 +142,7 @@ function HorizontalSection({ title, icon, slug, articles, accentColor }) {
 function HomePage() {
    const [articles, setArticles] = useState([]);
    const [recommendations, setRecommendations] = useState([]);
+   const [dailyHighlights, setDailyHighlights] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
    const loggedInUser = tokenStorage.getUser();
@@ -162,6 +164,14 @@ function HomePage() {
                }
             } catch (recErr) {
                console.error('Recommendations error:', recErr);
+            }
+
+            // Fetch daily highlights
+            try {
+               const daily = await recommendationAPI.getDaily(8);
+               setDailyHighlights(daily);
+            } catch (dailyErr) {
+               console.error('Daily highlights error:', dailyErr);
             }
 
             setLoading(false);
@@ -301,7 +311,20 @@ function HomePage() {
             </div>
          </section>
 
-         {/* ========== DIVIDER ========== */}
+         {/* ========== TIÊU ĐIỂM TRONG NGÀY (DAILY HIGHLIGHTS) ========== */}
+         {dailyHighlights && dailyHighlights.length > 0 && (
+            <div className={styles.container} style={{ marginTop: '3rem' }}>
+               <HorizontalSection
+                  title="🔥 Tiêu Điểm Trong Ngày"
+                  icon=""
+                  slug=""
+                  articles={dailyHighlights}
+                  accentColor="#FF4757"
+               />
+            </div>
+         )}
+
+         {/* ========== RECOMMENDED FOR YOU ========== */}
          <div className={styles.divider} />
 
          {/* ========== ĐỀ XUẤT CHO BẠN (AI Recommendations) ========== */}

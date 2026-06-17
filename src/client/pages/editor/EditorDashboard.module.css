@@ -1,26 +1,20 @@
-:root {
-   --bg-dark: #0b0b0c;
-   --bg-panel: #0f1113;
-   --bg-hover: rgba(255, 255, 255, 0.04);
-   --text-primary: #e8e8e8;
-   --text-muted: #9aa0a6;
-   --gold: #e4b24a;
-   --gold-hover: #ffb84d;
-   --border: 1px solid rgba(255, 255, 255, 0.08);
+.editorDashboard {
+   --bg-dark: var(--bg-primary);
+   --bg-panel: var(--bg-secondary);
+   --bg-hover-custom: var(--bg-hover);
+   --text-primary-custom: var(--text-primary);
+   --text-muted-custom: var(--text-secondary);
+   --gold: var(--gold-primary);
+   --gold-hover: var(--gold-hover);
+   --border: 1px solid var(--border-color);
    --success: #4caf50;
    --warning: #ff9800;
    --error: #f44336;
-}
 
-* {
-   box-sizing: border-box;
-}
-
-.editorDashboard {
    display: flex;
    min-height: 100vh;
-   background: linear-gradient(180deg, #060606 0%, #0b0b0c 100%);
-   color: var(--text-primary);
+   background: var(--bg-primary);
+   color: var(--text-primary-custom);
    font-family: inherit;
 }
 
@@ -54,7 +48,7 @@
 .sidebarSub {
    display: block;
    font-size: 0.75rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin-top: 0.2rem;
 }
 
@@ -72,7 +66,7 @@
    padding: 0.7rem 1rem;
    border: none;
    background: transparent;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    cursor: pointer;
    border-radius: 6px;
    transition: all 0.2s;
@@ -82,8 +76,8 @@
 }
 
 .navItem:hover {
-   background: var(--bg-hover);
-   color: var(--text-primary);
+   background: var(--bg-hover-custom);
+   color: var(--text-primary-custom);
 }
 
 .navItemActive {
@@ -167,7 +161,7 @@
 
 .statLabel {
    font-size: 0.85rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .statValue {
@@ -244,7 +238,7 @@
 
 .submitDate {
    font-size: 0.8rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .categoryBadge {
@@ -264,7 +258,7 @@
 }
 
 .reviewExcerpt {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.9rem;
    line-height: 1.5;
    margin-bottom: 1rem;
@@ -274,7 +268,7 @@
    display: flex;
    gap: 0.5rem;
    font-size: 0.85rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    margin-bottom: 1rem;
 }
 
@@ -334,7 +328,7 @@
 
 .btnApprove {
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
 }
 
 .btnApprove:hover {
@@ -354,11 +348,11 @@
    grid-template-columns: 2fr 1fr 1fr 1fr;
    gap: 1rem;
    padding: 1rem;
-   background: rgba(0, 0, 0, 0.2);
+   background: var(--bg-hover-custom);
    border-bottom: var(--border);
    font-weight: 600;
    font-size: 0.9rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
 }
 
 .tableRow {
@@ -372,7 +366,7 @@
 }
 
 .tableRow:hover {
-   background: var(--bg-hover);
+   background: var(--bg-hover-custom);
 }
 
 .tableRow:last-child {
@@ -381,7 +375,7 @@
 
 .title {
    font-weight: 600;
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
    overflow: hidden;
    text-overflow: ellipsis;
    white-space: nowrap;
@@ -425,7 +419,7 @@
 .guideSection ul {
    margin: 0;
    padding-left: 1.5rem;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    line-height: 1.8;
 }
 
@@ -470,7 +464,7 @@
 
 .profileHeader p {
    margin: 0;
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.9rem;
 }
 
@@ -488,7 +482,7 @@
 }
 
 .statItem .statLabel {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-size: 0.85rem;
    display: block;
    margin-bottom: 0.5rem;
@@ -514,12 +508,12 @@
 }
 
 .detailRow label {
-   color: var(--text-muted);
+   color: var(--text-muted-custom);
    font-weight: 600;
 }
 
 .detailRow span {
-   color: var(--text-primary);
+   color: var(--text-primary-custom);
 }
 
 /* ========== BUTTONS ========== */
@@ -527,7 +521,7 @@
    width: 100%;
    padding: 0.8rem;
    background: var(--gold);
-   color: #111;
+   color: var(--bg-primary);
    border: none;
    border-radius: 6px;
    font-weight: 600;
@@ -545,8 +539,8 @@
    width: 100%;
    padding: 0.8rem;
    background: transparent;
-   color: var(--text-primary);
-   border: 1px solid var(--text-muted);
+   color: var(--text-primary-custom);
+   border: 1px solid var(--text-muted-custom);
    border-radius: 6px;
    font-weight: 600;
    font-size: 0.95rem;
@@ -555,7 +549,7 @@
 }
 
 .btnOutlineFull:hover {
-   border-color: var(--text-primary);
+   border-color: var(--text-primary-custom);
 }
 
 /* ========== RESPONSIVE ========== */
