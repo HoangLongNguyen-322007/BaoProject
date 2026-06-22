@@ -618,3 +618,228 @@
       grid-template-columns: 1fr;
    }
 }
+
+/* ========== EARNINGS PANEL ========== */
+.earningsPanel {
+   width: 100%;
+}
+
+.earningsPanel h1 {
+   font-size: 1.8rem;
+   margin-bottom: 1.5rem;
+   font-weight: 700;
+}
+
+.earningsPanel h2 {
+   font-size: 1.2rem;
+   margin-bottom: 1rem;
+   font-weight: 600;
+}
+
+.earningsSummary {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 1rem;
+   margin-bottom: 2rem;
+}
+
+.earningsCard {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   padding: 1.3rem 1.2rem;
+   background: var(--bg-panel);
+   border: var(--border);
+   border-radius: 12px;
+   transition: all 0.2s;
+}
+
+.earningsCard:hover {
+   border-color: rgba(228, 178, 74, 0.4);
+   transform: translateY(-2px);
+}
+
+.earningsCardIcon {
+   font-size: 2rem;
+   flex-shrink: 0;
+}
+
+.earningsCardBody {
+   display: flex;
+   flex-direction: column;
+   gap: 0.3rem;
+}
+
+.earningsCardLabel {
+   font-size: 0.8rem;
+   color: var(--text-muted-custom);
+}
+
+.earningsCardValue {
+   font-size: 1.5rem;
+   font-weight: 700;
+   color: var(--gold);
+}
+
+/* Rate info box */
+.rateBox {
+   background: rgba(228, 178, 74, 0.05);
+   border: 1px solid rgba(228, 178, 74, 0.2);
+   border-radius: 12px;
+   padding: 1.5rem;
+   margin-bottom: 2rem;
+}
+
+.rateTitle {
+   font-size: 1rem;
+   font-weight: 700;
+   margin-bottom: 1rem;
+   color: var(--gold);
+}
+
+.rateGrid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+   gap: 1rem;
+}
+
+.rateItem {
+   display: flex;
+   align-items: flex-start;
+   gap: 0.8rem;
+}
+
+.rateIcon {
+   font-size: 1.4rem;
+   flex-shrink: 0;
+   margin-top: 0.1rem;
+}
+
+.rateItem strong {
+   display: block;
+   font-size: 0.95rem;
+   color: var(--text-primary-custom);
+   margin-bottom: 0.2rem;
+}
+
+.rateItem p {
+   font-size: 0.85rem;
+   color: var(--text-muted-custom);
+   margin: 0;
+}
+
+/* Table */
+.earningsTableWrap {
+   background: var(--bg-panel);
+   border: var(--border);
+   border-radius: 12px;
+   overflow: hidden;
+   margin-bottom: 1.5rem;
+   padding: 1.5rem;
+}
+
+.earningsTable {
+   width: 100%;
+   border-collapse: collapse;
+   font-size: 0.88rem;
+}
+
+.earningsTable thead tr {
+   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.earningsTable th {
+   padding: 0.7rem 0.6rem;
+   text-align: right;
+   color: var(--text-muted-custom);
+   font-weight: 600;
+   font-size: 0.8rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   white-space: nowrap;
+}
+
+.earningsTable th:first-child {
+   text-align: left;
+}
+
+.earningsTable tbody tr {
+   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+   transition: background 0.15s;
+}
+
+.earningsTable tbody tr:hover {
+   background: rgba(255, 255, 255, 0.03);
+}
+
+.earningsTable tfoot tr {
+   border-top: 2px solid rgba(228, 178, 74, 0.3);
+}
+
+.articleTitleCell {
+   padding: 0.7rem 0.6rem;
+   max-width: 220px;
+}
+
+.articleTitleText {
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+   line-clamp: 2;
+   -webkit-box-orient: vertical;
+   overflow: hidden;
+   color: var(--text-primary-custom);
+   font-weight: 500;
+   line-height: 1.4;
+}
+
+.numCell {
+   padding: 0.7rem 0.6rem;
+   text-align: right;
+   color: var(--text-muted-custom);
+   white-space: nowrap;
+}
+
+.totalCol {
+   padding: 0.7rem 0.6rem;
+   text-align: right;
+   font-weight: 700;
+}
+
+.totalEarnings {
+   color: var(--gold);
+   font-weight: 700;
+}
+
+.grandTotal {
+   font-size: 1.1rem;
+   color: #4caf50;
+   font-weight: 800;
+}
+
+.engagementHigh {
+   color: #ff9800;
+   font-weight: 600;
+}
+
+.engagementNormal {
+   color: var(--text-muted-custom);
+}
+
+.bonusPositive {
+   color: #4caf50;
+   font-weight: 600;
+}
+
+.earningsDisclaimer {
+   font-size: 0.82rem;
+   color: var(--text-muted-custom);
+   padding: 1rem 1.2rem;
+   background: rgba(255, 152, 0, 0.05);
+   border: 1px solid rgba(255, 152, 0, 0.15);
+   border-radius: 8px;
+   line-height: 1.6;
+}
+
+.earningsDisclaimer strong {
+   color: #ff9800;
+}

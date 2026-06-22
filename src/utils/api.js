@@ -269,6 +269,16 @@ const getMockFallback = (method, endpoint, data) => {
 
 // API helper function with mock fallback on connection failure or server errors
 const apiCall = async (method, endpoint, data = null) => {
+   const cacheKey = `${method}:${endpoint}`;
+
+   // Try to get from cache for GET requests
+   if (method === 'GET') {
+      const { apiCache } = await import('./cache.js');
+      if (apiCache.has(cacheKey)) {
+         return apiCache.get(cacheKey);
+      }
+   }
+
    const options = {
       method,
       headers: getHeaders(),
@@ -294,6 +304,12 @@ const apiCall = async (method, endpoint, data = null) => {
          const err = new Error(responseData.message || 'API error');
          err.status = response.status;
          throw err;
+      }
+
+      // Save to cache for GET requests
+      if (method === 'GET') {
+         const { apiCache } = await import('./cache.js');
+         apiCache.set(cacheKey, responseData);
       }
 
       return responseData;

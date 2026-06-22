@@ -2,22 +2,27 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { articlesAPI } from '../../utils/api';
 import { CATEGORIES, CATEGORY_MAP } from '../../constant/global';
+import { apiCache } from '../../utils/cache';
 import ArticleGrid from '../components/ArticleGrid';
 import styles from './CategoryPage.module.css';
 
 function CategoryPage() {
    const { category } = useParams();
-   const [articles, setArticles] = useState([]);
-   const [loading, setLoading] = useState(true);
+   
+   const cacheKey = `GET:/articles/category/${category}?limit=15&offset=0`;
+   const cachedData = apiCache.has(cacheKey) ? apiCache.get(cacheKey) : null;
+
+   const [articles, setArticles] = useState(cachedData ? (Array.isArray(cachedData) ? cachedData : []) : []);
+   const [loading, setLoading] = useState(!cachedData);
    const [error, setError] = useState(null);
    
    useEffect(() => {
       const fetchArticles = async () => {
-         setLoading(true);
+         if (!cachedData) setLoading(true);
          setError(null);
          try {
             // Pass the category slug directly to the API
-            const data = await articlesAPI.getByCategory(category, 50, 0);
+            const data = await articlesAPI.getByCategory(category, 15, 0);
             setArticles(Array.isArray(data) ? data : []);
          } catch (err) {
             console.error('Failed to fetch category articles:', err);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { articlesAPI, commentsAPI, bookmarksAPI, recommendationAPI, tokenStorage } from '../../utils/api';
+import { apiCache } from '../../utils/cache';
 import { CATEGORY_MAP } from '../../constant/global';
 import styles from './ArticleDetailPage.module.css';
 
@@ -20,10 +20,14 @@ const getTimeAgo = (dateStr) => {
 
 function ArticleDetailPage() {
    const { id } = useParams();
-   const [article, setArticle] = useState(null);
+   
+   const cacheKey = `GET:/articles/${id}`;
+   const cachedArticle = apiCache.has(cacheKey) ? apiCache.get(cacheKey) : null;
+
+   const [article, setArticle] = useState(cachedArticle);
    const [relatedArticles, setRelatedArticles] = useState([]);
    const [mostReadArticles, setMostReadArticles] = useState([]);
-   const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(!cachedArticle);
    const [error, setError] = useState(null);
    const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1.0);
    const [copied, setCopied] = useState(false);
@@ -36,13 +40,13 @@ function ArticleDetailPage() {
    const [isBookmarked, setIsBookmarked] = useState(false);
    const [bookmarkLoading, setBookmarkLoading] = useState(false);
    const [isLiked, setIsLiked] = useState(false);
-   const [likeCount, setLikeCount] = useState(0);
+   const [likeCount, setLikeCount] = useState(cachedArticle?.likes || 0);
    const [likeLoading, setLikeLoading] = useState(false);
    const [recommendations, setRecommendations] = useState([]);
 
    useEffect(() => {
       const fetchData = async () => {
-         setLoading(true);
+         if (!cachedArticle) setLoading(true);
          setError(null);
          try {
             // Fetch main article
@@ -255,12 +259,7 @@ function ArticleDetailPage() {
    };
 
    return (
-      <motion.div 
-         className={styles.articlePage}
-         initial={{ opacity: 0, y: 20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.5, ease: "easeOut" }}
-      >
+      <div className={styles.articlePage}>
          {/* Toast Notification for copying link */}
          {copied && <div className={styles.toast}>Đã sao chép liên kết thành công!</div>}
 
@@ -630,7 +629,7 @@ function ArticleDetailPage() {
                </aside>
             </div>
          </div>
-      </motion.div>
+      </div>
    );
 }
 

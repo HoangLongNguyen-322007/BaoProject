@@ -83,19 +83,18 @@ async function runScraper() {
     }
     const adminId = userRes.rows[0].id;
 
+    let totalAdded = 0;
     for (const cat of CATEGORIES) {
       try {
         const feed = await parser.parseURL(cat.url);
         const items = feed.items.slice(0, 10); // Lấy 10 bài mới nhất mỗi lần quét
         
         let added = 0;
+        const newArticleIds = [];
         for (const item of items) {
           try {
-            const check = await pool.query('SELECT id FROM articles WHERE title = $1 AND category = $2', [item.title, cat.slug]);
-            if (check.rows.length > 0) {
-              continue;
-            }
-
+            const sourceUrl = item.link;
+            // Kiểm tra trùng lặp sẽ được xử lý tự động bằng rào cản DB (ON CONFLICT)
             let image = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800';
             const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
             if (imgMatch && imgMatch[1]) {
@@ -112,31 +111,57 @@ async function runScraper() {
             }
 
             const views = Math.floor(Math.random() * 1000) + 50;
-            const likes = Math.floor(views * (Math.random() * 0.3 + 0.05));
+            // Lượt thích tích lũy luôn nhiều hơn lượt xem (1.2x — 3.0x)
+            const likes = Math.floor(views * (Math.random() * 1.8 + 1.2));
             const readTime = Math.max(3, Math.ceil(content.length / 1000));
             
             // Xử lý thời gian
             const publishedAt = new Date(item.pubDate || Date.now());
 
-            await pool.query(
+            const insertRes = await pool.query(
               `INSERT INTO articles 
-              (title, excerpt, content, category, author_id, editor_id, image, "readTime", status, views, likes, "publishedAt", "createdAt")
-              VALUES ($1, $2, $3, $4, $5, $5, $6, $7, 'published', $8, $9, $10, NOW())`,
-              [item.title, excerpt, content, cat.slug, adminId, image, readTime, views, likes, publishedAt]
+              (title, excerpt, content, category, author_id, editor_id, image, "readTime", status, views, likes, "publishedAt", "createdAt", source_url)
+              VALUES ($1, $2, $3, $4, $5, $5, $6, $7, 'published', $8, $9, $10, NOW(), $11)
+              ON CONFLICT (source_url) DO NOTHING
+              RETURNING id`,
+              [item.title, excerpt, content, cat.slug, adminId, image, readTime, views, likes, publishedAt, sourceUrl]
             );
-            added++;
+            
+            if (insertRes.rows.length > 0) {
+              newArticleIds.push(insertRes.rows[0].id);
+              added++;
+            }
           } catch (itemErr) {
             console.error(`[Auto-Scraper] Lỗi bài viết:`, itemErr.message);
           }
         }
         if (added > 0) {
           console.log(`[Auto-Scraper] Đã thêm ${added} bài viết mới cho chuyên mục ${cat.slug}`);
+          totalAdded += added;
         }
       } catch (catErr) {
         console.error(`[Auto-Scraper] Lỗi feed ${cat.url}:`, catErr.message);
       }
     }
-    console.log('[Auto-Scraper] ✅ Cập nhật tin tức thành công!');
+    console.log(`[Auto-Scraper] ✅ Cập nhật tin tức thành công! Tổng cộng: ${totalAdded} bài viết mới.`);
+    
+    // Cleanup old articles to save DB space
+    try {
+      await pool.query(`
+        WITH RankedArticles AS (
+          SELECT id, ROW_NUMBER() OVER(PARTITION BY category ORDER BY "createdAt" DESC) as rn
+          FROM articles
+        )
+        DELETE FROM articles
+        WHERE id IN (
+          SELECT id FROM RankedArticles WHERE rn > 10
+        )
+      `);
+      console.log('[Auto-Scraper] Đã dọn dẹp DB (chỉ giữ lại 10 bài mới nhất cho mỗi chuyên mục).');
+    } catch (cleanupErr) {
+      console.error('[Auto-Scraper] Lỗi dọn dẹp DB:', cleanupErr.message);
+    }
+
   } catch (err) {
     console.error('[Auto-Scraper] Lỗi tổng:', err.message);
   }

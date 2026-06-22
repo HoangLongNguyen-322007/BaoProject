@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { articlesAPI, recommendationAPI, tokenStorage } from '../../utils/api';
+import { apiCache } from '../../utils/cache';
 import { CATEGORY_MAP } from '../../constant/global';
 import styles from './HomePage.module.css';
 
@@ -48,7 +48,7 @@ function TimeAgo({ date }) {
 function CategorySection({ title, icon, slug, articles, accentColor }) {
    if (!articles || articles.length === 0) return null;
    const featured = articles[0];
-   const list = articles.slice(1, 5);
+   const list = articles.slice(1, 4);
 
    return (
       <div className={styles.categorySection} style={{ '--section-accent': accentColor }}>
@@ -116,7 +116,7 @@ function HorizontalSection({ title, icon, slug, articles, accentColor }) {
             </Link>
          </div>
          <div className={styles.horizGrid}>
-            {articles.slice(0, 8).map((article) => (
+            {articles.slice(0, 4).map((article) => (
                <Link key={article.id} to={`/article/${article.id}`} className={styles.horizCard}>
                   <div className={styles.horizImgWrap}>
                      <img
@@ -139,18 +139,110 @@ function HorizontalSection({ title, icon, slug, articles, accentColor }) {
    );
 }
 
+// ---- Lazy-loaded Category Section ----
+function LazyCategorySection({ title, icon, slug, accentColor }) {
+   const [articles, setArticles] = useState(null);
+   const [isVisible, setIsVisible] = useState(false);
+   const sectionRef = React.useRef(null);
+
+   useEffect(() => {
+      const observer = new IntersectionObserver(
+         ([entry]) => {
+            if (entry.isIntersecting) {
+               setIsVisible(true);
+               observer.disconnect();
+            }
+         },
+         { rootMargin: '200px' }
+      );
+      if (sectionRef.current) observer.observe(sectionRef.current);
+      return () => observer.disconnect();
+   }, []);
+
+   useEffect(() => {
+      if (isVisible && articles === null) {
+         articlesAPI.getByCategory(slug, 4, 0).then(data => {
+            setArticles(data || []);
+         }).catch(err => {
+            console.error(err);
+            setArticles([]);
+         });
+      }
+   }, [isVisible, slug, articles]);
+
+   return (
+      <div ref={sectionRef} style={{ minHeight: '300px' }}>
+         {articles === null ? (
+             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '300px' }}>
+                 <div className="loading-spinner" style={{ color: accentColor }}>Đang tải {title}...</div>
+             </div>
+         ) : articles.length > 0 ? (
+             <CategorySection title={title} icon={icon} slug={slug} articles={articles} accentColor={accentColor} />
+         ) : null}
+      </div>
+   );
+}
+
+// ---- Lazy-loaded Horizontal Section ----
+function LazyHorizontalSection({ title, icon, slug, accentColor }) {
+   const [articles, setArticles] = useState(null);
+   const [isVisible, setIsVisible] = useState(false);
+   const sectionRef = React.useRef(null);
+
+   useEffect(() => {
+      const observer = new IntersectionObserver(
+         ([entry]) => {
+            if (entry.isIntersecting) {
+               setIsVisible(true);
+               observer.disconnect();
+            }
+         },
+         { rootMargin: '200px' }
+      );
+      if (sectionRef.current) observer.observe(sectionRef.current);
+      return () => observer.disconnect();
+   }, []);
+
+   useEffect(() => {
+      if (isVisible && articles === null) {
+         articlesAPI.getByCategory(slug, 4, 0).then(data => {
+            setArticles(data || []);
+         }).catch(err => {
+            console.error(err);
+            setArticles([]);
+         });
+      }
+   }, [isVisible, slug, articles]);
+
+   return (
+      <div ref={sectionRef} style={{ minHeight: '300px' }}>
+         {articles === null ? (
+             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '300px' }}>
+                 <div className="loading-spinner" style={{ color: accentColor }}>Đang tải {title}...</div>
+             </div>
+         ) : articles.length > 0 ? (
+             <HorizontalSection title={title} icon={icon} slug={slug} articles={articles} accentColor={accentColor} />
+         ) : null}
+      </div>
+   );
+}
+
 function HomePage() {
-   const [articles, setArticles] = useState([]);
+   const cacheKey = `GET:/articles?limit=15&offset=0`;
+   const cachedData = apiCache.has(cacheKey) ? apiCache.get(cacheKey) : null;
+   const initialArticles = cachedData ? cachedData.filter((item, index, self) => index === self.findIndex((t) => t.title === item.title)) : [];
+
+   const [articles, setArticles] = useState(initialArticles);
    const [recommendations, setRecommendations] = useState([]);
    const [dailyHighlights, setDailyHighlights] = useState([]);
-   const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(!cachedData);
    const [error, setError] = useState(null);
    const loggedInUser = tokenStorage.getUser();
 
    useEffect(() => {
       const fetchArticles = async () => {
          try {
-            const data = await articlesAPI.getAll(100, 0);
+            const data = await articlesAPI.getAll(15, 0);
             const uniqueData = data.filter((item, index, self) => 
                index === self.findIndex((t) => t.title === item.title)
             );
@@ -222,30 +314,8 @@ function HomePage() {
    const midArticles = articles.slice(1, 5);
    const latestNews = articles.slice(0, 10);
 
-   // Category filters
-   const byCat = (cat) => articles.filter((a) => a.category === cat);
-   const thoisuArticles = byCat('thoisu');
-   const techArticles = byCat('technology');
-   const sportsArticles = byCat('sports');
-   const entertainmentArticles = byCat('entertainment');
-   const businessArticles = byCat('business');
-   const theGioiArticles = byCat('thegioi');
-   const healthArticles = byCat('health');
-   const educationArticles = byCat('education');
-   const travelArticles = byCat('travel');
-   const khoaHocArticles = byCat('khoahoc');
-   const xeArticles = byCat('xe');
-   const doiSongArticles = byCat('doisong');
-   const tamSuArticles = byCat('tamsu');
-   const phapLuatArticles = byCat('phapluat');
-
    return (
-      <motion.div 
-         className={styles.homeWrap}
-         initial={{ opacity: 0 }}
-         animate={{ opacity: 1 }}
-         transition={{ duration: 0.6 }}
-      >
+      <div className={styles.homeWrap}>
          {/* ========== HERO SECTION (LATEST NEWS) ========== */}
          <section className={styles.heroSection} aria-label="Tin nổi bật">
             <div className={styles.container}>
@@ -340,13 +410,7 @@ function HomePage() {
 
          {/* ========== ĐỀ XUẤT CHO BẠN (AI Recommendations) ========== */}
          {recommendations.length > 0 && (
-            <motion.section 
-               className={styles.mainSections} aria-label="Đề xuất cho bạn"
-               initial={{ opacity: 0, y: 20 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               viewport={{ once: true, margin: "-50px" }}
-               transition={{ duration: 0.5 }}
-            >
+            <section className={styles.mainSections} aria-label="Đề xuất cho bạn">
                <div className={styles.container}>
                   <div className={styles.recSection}>
                      <div className={styles.sectionHead}>
@@ -387,200 +451,146 @@ function HomePage() {
                      </div>
                   </div>
                </div>
-            </motion.section>
+            </section>
          )}
 
          <div className={styles.divider} />
 
          {/* ========== ROW 1: THỜI SỰ + CÔNG NGHỆ ========== */}
-         <motion.section 
-            className={styles.mainSections} aria-label="Tin tức theo chuyên mục"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections} aria-label="Tin tức theo chuyên mục">
             <div className={styles.container}>
                <div className={styles.sectionsGrid}>
-                  <CategorySection
+                  <LazyCategorySection
                      title="THỜI SỰ" icon="📰" slug="thoisu"
-                     articles={thoisuArticles} accentColor="#E53E3E"
+                     accentColor="#E53E3E"
                   />
-                  <CategorySection
+                  <LazyCategorySection
                      title="CÔNG NGHỆ" icon="💻" slug="technology"
-                     articles={techArticles} accentColor="#4299E1"
+                     accentColor="#4299E1"
                   />
                </div>
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 2: KINH DOANH (full width horizontal) ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
-               <HorizontalSection
+               <LazyHorizontalSection
                   title="KINH DOANH" icon="💰" slug="business"
-                  articles={businessArticles} accentColor="#D4AF37"
+                  accentColor="#D4AF37"
                />
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 3: THỂ THAO + GIẢI TRÍ ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
                <div className={styles.sectionsGrid}>
-                  <CategorySection
+                  <LazyCategorySection
                      title="THỂ THAO" icon="⚽" slug="sports"
-                     articles={sportsArticles} accentColor="#38A169"
+                     accentColor="#38A169"
                   />
-                  <CategorySection
+                  <LazyCategorySection
                      title="GIẢI TRÍ" icon="🎬" slug="entertainment"
-                     articles={entertainmentArticles} accentColor="#805AD5"
+                     accentColor="#805AD5"
                   />
                </div>
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 4: THẾ GIỚI (full width horizontal) ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
-               <HorizontalSection
+               <LazyHorizontalSection
                   title="THẾ GIỚI" icon="🌍" slug="thegioi"
-                  articles={theGioiArticles} accentColor="#3182CE"
+                  accentColor="#E53E3E"
                />
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 5: SỨC KHỎE + GIÁO DỤC ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
                <div className={styles.sectionsGrid}>
-                  <CategorySection
+                  <LazyCategorySection
                      title="SỨC KHỎE" icon="🏥" slug="health"
-                     articles={healthArticles} accentColor="#DD6B20"
+                     accentColor="#DD6B20"
                   />
-                  <CategorySection
+                  <LazyCategorySection
                      title="GIÁO DỤC" icon="📚" slug="education"
-                     articles={educationArticles} accentColor="#B7791F"
+                     accentColor="#B7791F"
                   />
                </div>
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 6: DU LỊCH (full width horizontal) ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
-               <HorizontalSection
+               <LazyHorizontalSection
                   title="DU LỊCH" icon="✈️" slug="travel"
-                  articles={travelArticles} accentColor="#2C7A7B"
+                  accentColor="#3182CE"
                />
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 7: KHOA HỌC + XE ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
                <div className={styles.sectionsGrid}>
-                  <CategorySection
+                  <LazyCategorySection
                      title="KHOA HỌC" icon="🔬" slug="khoahoc"
-                     articles={khoaHocArticles} accentColor="#6B46C1"
+                     accentColor="#6B46C1"
                   />
-                  <CategorySection
+                  <LazyCategorySection
                      title="XE" icon="🚗" slug="xe"
-                     articles={xeArticles} accentColor="#718096"
+                     accentColor="#718096"
                   />
                </div>
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 8: ĐỜI SỐNG + TÂM SỰ ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
                <div className={styles.sectionsGrid}>
-                  <CategorySection
+                  <LazyCategorySection
                      title="ĐỜI SỐNG" icon="☕" slug="doisong"
-                     articles={doiSongArticles} accentColor="#F6AD55"
+                     accentColor="#F6AD55"
                   />
-                  <CategorySection
+                  <LazyCategorySection
                      title="TÂM SỰ" icon="💌" slug="tamsu"
-                     articles={tamSuArticles} accentColor="#F687B3"
+                     accentColor="#F687B3"
                   />
                </div>
             </div>
-         </motion.section>
+         </section>
 
          <div className={styles.divider} />
 
          {/* ========== ROW 9: PHÁP LUẬT (full width horizontal) ========== */}
-         <motion.section 
-            className={styles.mainSections}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-         >
+         <section className={styles.mainSections}>
             <div className={styles.container}>
-               <HorizontalSection
+               <LazyHorizontalSection
                   title="PHÁP LUẬT" icon="⚖️" slug="phapluat"
-                  articles={phapLuatArticles} accentColor="#4A5568"
+                  accentColor="#E53E3E"
                />
             </div>
-         </motion.section>
+         </section>
 
          {/* ========== VALUES STRIP ========== */}
          <footer className={styles.valuesStrip} aria-label="Giá trị cốt lõi">
@@ -603,7 +613,7 @@ function HomePage() {
                </div>
             </div>
          </footer>
-      </motion.div>
+      </div>
    );
 }
 

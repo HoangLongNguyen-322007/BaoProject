@@ -54,38 +54,38 @@ function AppLayout() {
                <Route path="/article/:id" element={<ArticleDetailPage />} />
                <Route path="/search" element={<SearchPage />} />
                <Route path="/category/:category" element={<CategoryPage />} />
-               
-               <Route 
-                  path="/profile" 
+
+               <Route
+                  path="/profile"
                   element={
                      <ProtectedRoute>
                         <ProfileEditPage />
                      </ProtectedRoute>
-                  } 
+                  }
                />
-               <Route 
-                  path="/author" 
+               <Route
+                  path="/author"
                   element={
                      <ProtectedRoute allowedRoles={['author']}>
                         <AuthorDashboard />
                      </ProtectedRoute>
-                  } 
+                  }
                />
-               <Route 
-                  path="/editor" 
+               <Route
+                  path="/editor"
                   element={
                      <ProtectedRoute allowedRoles={['editor']}>
                         <EditorDashboard />
                      </ProtectedRoute>
-                  } 
+                  }
                />
-               <Route 
-                  path="/admin" 
+               <Route
+                  path="/admin"
                   element={
                      <ProtectedRoute allowedRoles={['admin']}>
                         <AdminDashboard />
                      </ProtectedRoute>
-                  } 
+                  }
                />
 
                <Route

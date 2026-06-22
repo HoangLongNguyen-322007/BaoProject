@@ -25,7 +25,8 @@ class ArticleRepository {
 
   async findByAuthor(author_id, limit = 50, offset = 0) {
     const result = await pool.query(
-      `SELECT * FROM articles WHERE author_id = $1
+      `SELECT id, title, excerpt, category, image, "readTime", status, views, likes, tags, "isFeatured", "createdAt", "publishedAt"
+       FROM articles WHERE author_id = $1
        ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
       [author_id, limit, offset]
     );
@@ -34,7 +35,7 @@ class ArticleRepository {
 
   async findByStatus(status, limit = 50, offset = 0) {
     const result = await pool.query(
-      `SELECT a.*, u."fullName" as "authorName"
+      `SELECT a.id, a.title, a.excerpt, a.category, a.image, a."readTime", a.status, a.views, a.likes, a.tags, a."isFeatured", a."createdAt", a."publishedAt", u."fullName" as "authorName"
        FROM articles a
        LEFT JOIN users u ON a.author_id = u.id
        WHERE a.status = $1
@@ -68,7 +69,7 @@ class ArticleRepository {
 
   async findAll(limit = 50, offset = 0) {
     const result = await pool.query(
-      `SELECT a.*, u."fullName" as "authorName"
+      `SELECT a.id, a.title, a.excerpt, a.category, a.image, a."readTime", a.status, a.views, a.likes, a.tags, a."isFeatured", a."createdAt", a."publishedAt", u."fullName" as "authorName"
        FROM articles a
        LEFT JOIN users u ON a.author_id = u.id
        ORDER BY a."createdAt" DESC
@@ -180,7 +181,6 @@ class ArticleRepository {
        WHERE search_vector @@ plainto_tsquery('simple', $1)
           OR title ILIKE $2
           OR excerpt ILIKE $2
-          OR content ILIKE $2
        ORDER BY rank DESC, "publishedAt" DESC
        LIMIT $3 OFFSET $4`,
       [cleanQuery, `%${cleanQuery}%`, limit, offset]
